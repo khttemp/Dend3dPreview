@@ -48,6 +48,10 @@ public class OpenRailDataOnlyRail : MonoBehaviour
             {
                 mMain.SetActiveButton();
                 mMain.mRailMgr.SetRailData(mMain);
+                if (mMain.mRailMgr.isError)
+                {
+                    MessageBox.Show("レール配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 mMain.mAMBMgr.RemoveAMB();
                 mMain.SetInitCamera();
             }

@@ -18,12 +18,14 @@ namespace RailMgrClass
         public List<GameObject> kasenchuObjList = new List<GameObject>();
         MdlMgr mMdlMgr = new MdlMgr();
         public List<int[]> prevFailList = new List<int[]>();
+        public bool isError = false;
 
-        public bool CreateRail(int rail_index, string mdl_name, string kasenchu_mdl_name, Main mMain)
+        public void CreateRail(int rail_index, string mdl_name, string kasenchu_mdl_name, Main mMain)
         {
             GameObject railObj = mMdlMgr.MdlCreate(mdl_name, "rail", mMain);
             if (railObj == null) {
-                return false;
+                isError = true;
+                return;
             }
             railObj.AddComponent<JointMdl>();
             JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
@@ -40,11 +42,15 @@ namespace RailMgrClass
                     railMdl.kasenchuObject = kasenchuObject;
                     kasenchuObjList.Add(kasenchuObject);
                 }
+                else
+                {
+                    isError = true;
+                    kasenchuObject.SetActive(false);
+                }
             }
 
             railObj.name = railObj.name + "_(" + rail_index + ")";
             railObjList.Add(railObj);
-            return true;
         }
 
         public void RemoveRail()
@@ -276,6 +282,7 @@ namespace RailMgrClass
         {
             try
             {
+                isError = false;
                 RemoveRail();
                 for (int i = 0; i < mMain.mStageTblMgr.RailList.Length; i++)
                 {
@@ -296,11 +303,7 @@ namespace RailMgrClass
                         kasenchu_name = mMain.mStageTblMgr.MdlList[kasenchu_mdl_no].mdl_name;
                     }
 
-                    bool railResult = CreateRail(i, mdl_name, kasenchu_name, mMain);
-                    if (!railResult) {
-                        MessageBox.Show("No." + i + "：探せないレールモデル\n" + mdl_name, "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
+                    CreateRail(i, mdl_name, kasenchu_name, mMain);
                 }
                 for (int i = 0; i < mMain.mStageTblMgr.RailList.Length; i++)
                 {

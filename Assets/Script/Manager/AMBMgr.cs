@@ -19,6 +19,7 @@ namespace AMBMgrClass
         public Dictionary<string, string[]> origin_size_per_dict;
         public Dictionary<string, string[]> size_per_dict;
         public List<string> keyList;
+        public bool isError = false;
 
         public AMBMgr()
         {
@@ -53,23 +54,26 @@ namespace AMBMgrClass
             }
         }
 
-        public bool CreateAMB(int amb_index, int child_index, int rail_no, string mdl_name, amb_data ambData, Main mMain)
+        public void CreateAMB(int amb_index, int child_index, int rail_no, string mdl_name, amb_data ambData, Main mMain)
         {
             GameObject ambObj = mMdlMgr.MdlCreate(mdl_name, "amb", mMain);
             if (ambObj == null) {
-                return false;
+                isError = true;
+                return;
             }
             if (rail_no >= mMain.mRailMgr.railObjList.Count)
             {
-                mMain.DebugError("AMB No." + amb_index + "は、存在しないレール番号(" + rail_no +")を指しています");
+                mMain.DebugError("AMB No." + amb_index + "-" + child_index + "は、存在しないレール番号(" + rail_no +")を指しています");
+                isError = true;
                 ambObj.SetActive(false);
-                return true;
+                return;
             }
             if (!mMain.mRailMgr.railObjList[rail_no].activeSelf)
             {
-                mMain.DebugError("AMB No." + amb_index + "は、Disabledレール番号(" + rail_no +")を指しています");
+                mMain.DebugError("AMB No." + amb_index + "-" + child_index + "は、Disabledレール番号(" + rail_no +")を指しています");
+                isError = true;
                 ambObj.SetActive(false);
-                return true;
+                return;
             }
             ambObj.AddComponent<JointMdl>();
             JointMdl ambJointModel = ambObj.GetComponent<JointMdl>();
@@ -111,7 +115,6 @@ namespace AMBMgrClass
                 ambMdlList = ambObjList[amb_index];
             }
             ambMdlList.Add(ambObj);
-            return true;
         }
 
         public void SetScale(GameObject ambObj, float scale, string name, string[] infoList)
@@ -231,6 +234,7 @@ namespace AMBMgrClass
                 if (ambMdl.ParentRailNo >= mMain.mRailMgr.railObjList.Count)
                 {
                     mMain.DebugError("AMB No." + amb_index + "のレール番号(" + ambMdl.ParentRailNo + ")不正");
+                    isError = true;
                     ambObj.SetActive(false);
                 }
                 else
@@ -258,6 +262,7 @@ namespace AMBMgrClass
                     else
                     {
                         mMain.DebugError("AMB No." + amb_index + "-" + (child_index + 1) + "ROOTが見つりません。\n入力値：AMB No." + amb_index + "-" + parent_index);
+                        isError = true;
                         ambObj.SetActive(false);
                     }
                     JointMdl searchAmbObjJointMdl = searchAmbObj.GetComponent<JointMdl>();
@@ -267,6 +272,7 @@ namespace AMBMgrClass
                 else
                 {
                     mMain.DebugError("AMB No." + amb_index + "-" + (child_index + 1) + "番目の親が見つりません。\n入力値：AMB No." + amb_index + "-" + parent_index);
+                    isError = true;
                     ambObj.SetActive(false);
                 }
             }
@@ -307,6 +313,7 @@ namespace AMBMgrClass
         {
             try
             {
+                isError = false;
                 RemoveAMB();
                 ambObjList = new List<GameObject>[mMain.mStageTblMgr.AmbList.Length];
                 for (int i = 0; i < mMain.mStageTblMgr.AmbList.Length; i++)
@@ -327,11 +334,7 @@ namespace AMBMgrClass
                         amb_data ambData = mMain.mStageTblMgr.AmbList[i].datalist[j];
                         int mdl_no = ambData.mdl_no;
                         string mdl_name = mMain.mStageTblMgr.MdlList[mdl_no].mdl_name;
-                        bool ambResult = mMain.mAMBMgr.CreateAMB(i, j, rail_no, mdl_name, ambData, mMain);
-                        if (!ambResult) {
-                            MessageBox.Show("No." + i + "：探せないAMBモデル\n" + mdl_name, "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
+                        mMain.mAMBMgr.CreateAMB(i, j, rail_no, mdl_name, ambData, mMain);
                     }
                 }
 

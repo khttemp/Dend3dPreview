@@ -205,10 +205,6 @@ namespace StageTblMgrClass
                     }
                     amb_data.mdl_no = mdl_no;
                     int parentindex = int.Parse(array43[num75++]);
-                    if (parentindex != (num77 - 1))
-                    {
-                        mMain.DebugWarning("AMB No." + num74 + "-" + (num77 + 1) + "番目のparentindex不正(" + parentindex +")");
-                    }
                     amb_data.parentindex = parentindex;
                     float x3 = float.Parse(array43[num75++]);
                     float y3 = float.Parse(array43[num75++]);

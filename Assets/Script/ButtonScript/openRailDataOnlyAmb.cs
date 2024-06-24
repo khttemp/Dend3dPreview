@@ -53,6 +53,10 @@ public class openRailDataOnlyAmb : MonoBehaviour
             else
             {
                 mMain.mAMBMgr.SetAmbData(mMain);
+                if (mMain.mAMBMgr.isError)
+                {
+                    MessageBox.Show("AMB一部 配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 mMain.SetInitCamera();
             }
             
