@@ -61,20 +61,6 @@ namespace AMBMgrClass
                 isError = true;
                 return;
             }
-            if (rail_no >= mMain.mRailMgr.railObjList.Count)
-            {
-                mMain.DebugError("AMB No." + amb_index + "-" + child_index + "は、存在しないレール番号(" + rail_no +")を指しています");
-                isError = true;
-                ambObj.SetActive(false);
-                return;
-            }
-            if (!mMain.mRailMgr.railObjList[rail_no].activeSelf)
-            {
-                mMain.DebugError("AMB No." + amb_index + "-" + child_index + "は、Disabledレール番号(" + rail_no +")を指しています");
-                isError = true;
-                ambObj.SetActive(false);
-                return;
-            }
             ambObj.AddComponent<JointMdl>();
             JointMdl ambJointModel = ambObj.GetComponent<JointMdl>();
             ambJointModel.Name = ambObj.name;
@@ -261,8 +247,7 @@ namespace AMBMgrClass
                     }
                     else
                     {
-                        mMain.DebugError("AMB No." + amb_index + "-" + (child_index + 1) + "ROOTが見つりません。\n入力値：AMB No." + amb_index + "-" + parent_index);
-                        isError = true;
+                        mMain.DebugWarning("AMB No." + amb_index + "-" + (child_index + 1) + "ROOTが見つりません。\n入力値：AMB No." + amb_index + "-" + parent_index);
                         ambObj.SetActive(false);
                     }
                     JointMdl searchAmbObjJointMdl = searchAmbObj.GetComponent<JointMdl>();
@@ -271,8 +256,7 @@ namespace AMBMgrClass
                 }
                 else
                 {
-                    mMain.DebugError("AMB No." + amb_index + "-" + (child_index + 1) + "番目の親が見つりません。\n入力値：AMB No." + amb_index + "-" + parent_index);
-                    isError = true;
+                    mMain.DebugWarning("AMB No." + amb_index + "-" + (child_index + 1) + "番目の親が見つりません。\n入力値：AMB No." + amb_index + "-" + parent_index);
                     ambObj.SetActive(false);
                 }
             }
@@ -323,9 +307,14 @@ namespace AMBMgrClass
                         continue;
                     }
                     int rail_no = mMain.mStageTblMgr.AmbList[i].rail_no;
-                    if (rail_no < 0)
+                    if (rail_no < 0 || rail_no >= mMain.mRailMgr.railObjList.Count)
                     {
-                        mMain.DebugWarning("レール番号不正(" + rail_no +")　No." + i + "のAMBは作成しない");
+                        mMain.DebugWarning("AMB No." + i + "は、存在しないレール番号(" + rail_no +")を指しています");
+                        continue;
+                    }
+                    if (!mMain.mRailMgr.railObjList[rail_no].activeSelf)
+                    {
+                        mMain.DebugWarning("AMB No." + i + "は、Disabledレール番号(" + rail_no +")を指しています");
                         continue;
                     }
 
@@ -342,7 +331,7 @@ namespace AMBMgrClass
             }
             catch (System.Exception e)
             {
-                MessageBox.Show("エラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("予想外のエラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.LogError(e.ToString());
                 mMain.DebugError(e.ToString());
             }

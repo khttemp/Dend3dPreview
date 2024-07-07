@@ -238,6 +238,7 @@ namespace RailMgrClass
             if (r.prev_rail >= railObjList.Count || rail_index == r.prev_rail)
             {
                 mMain.DebugError("No." + rail_index + " prev_rail Err!");
+                isError = true;
                 return;
             }
             GameObject prevRailObj = railObjList[r.prev_rail];
@@ -339,7 +340,7 @@ namespace RailMgrClass
             }
             catch (System.Exception e)
             {
-                MessageBox.Show("エラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("予想外のエラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.LogError(e.ToString());
                 mMain.DebugError(e.ToString());
             }

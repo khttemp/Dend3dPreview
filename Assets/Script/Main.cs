@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Windows.Forms;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -19,7 +21,7 @@ namespace MainClass
         public RailMgr mRailMgr = new RailMgr();
         public AMBMgr mAMBMgr = new AMBMgr();
         public string defaultPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
-        
+
         Transform CanvasTr;
         CameraMgr mCameraMgr;
         UnityButton openRailOnlyAmbButton;
@@ -30,6 +32,7 @@ namespace MainClass
         Vector3 initRotVector = new Vector3(0f, 0f, 0f);
         
         StreamWriter sw;
+        string datetimePattern = "yyyy-MM-dd HH:mm:ss";
 
         public void Start()
         {
@@ -61,6 +64,32 @@ namespace MainClass
             jumpRailButton.interactable = false;
         }
 
+        public void SetDrawModel(bool railFlag, bool ambFlag)
+        {
+            if (railFlag)
+            {
+                mRailMgr.SetRailData(this);
+                if (mRailMgr.isError)
+                {
+                    MessageBox.Show("レール配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            if (ambFlag)
+            {
+                mAMBMgr.SetAmbData(this);
+                if (mAMBMgr.isError)
+                {
+                    MessageBox.Show("AMB一部 配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                mAMBMgr.RemoveAMB();
+            }
+            SetInitCamera();
+        }
+
         public void SetInitCamera()
         {
             if (cameraToggle.isOn)
@@ -68,6 +97,7 @@ namespace MainClass
                 mCameraMgr.mainCamObj.transform.position = initPosVector;
                 mCameraMgr.mainCamObj.transform.rotation = Quaternion.Euler(initRotVector);
             }
+            mCameraMgr.moveFlag = true;
         }
 
         public void DebugError(string message)
@@ -76,16 +106,16 @@ namespace MainClass
             {
                 string ERROR_PATH = Path.Combine(System.Windows.Forms.Application.StartupPath, "error.log");
                 sw = new StreamWriter(ERROR_PATH, true, Encoding.UTF8);
-                sw.Write("[ERROR]：");
+                sw.Write(string.Format("[{0}][ERROR]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(message);
                 sw.Close();
             }
             catch (System.Exception ex)
             {
                 sw = new StreamWriter(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "error.log"), true, Encoding.UTF8);
-                sw.Write("[ERROR]：");
+                sw.Write(string.Format("[{0}][ERROR]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(ex.ToString() + "\n");
-                sw.Write("[ERROR]：");
+                sw.Write(string.Format("[{0}][ERROR]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(message);
                 sw.Close();
             }
@@ -95,18 +125,18 @@ namespace MainClass
         {
             try 
             {
-                string ERROR_PATH = Path.Combine(System.Windows.Forms.Application.StartupPath, "error.log");
+                string ERROR_PATH = Path.Combine(System.Windows.Forms.Application.StartupPath, "warning.log");
                 sw = new StreamWriter(ERROR_PATH, true, Encoding.UTF8);
-                sw.Write("[WARNING]：");
+                sw.Write(string.Format("[{0}][WARNING]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(message);
                 sw.Close();
             }
             catch (System.Exception ex)
             {
-                sw = new StreamWriter(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "error.log"), true, Encoding.UTF8);
-                sw.Write("[WARNING]：");
+                sw = new StreamWriter(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "warning.log"), true, Encoding.UTF8);
+                sw.Write(string.Format("[{0}][WARNING]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(ex.ToString() + "\n");
-                sw.Write("[WARNING]：");
+                sw.Write(string.Format("[{0}][WARNING]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(message);
                 sw.Close();
             }

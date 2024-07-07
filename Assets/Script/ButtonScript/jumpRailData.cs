@@ -123,11 +123,10 @@ public class jumpRailData : MonoBehaviour
                 GameObject railObj = mMain.mRailMgr.railObjList[intVal];
                 JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
 
-                mCameraMgr.mainCamObj.transform.position = railObjJointMdl.transform.position;
-                mCameraMgr.mainCamObj.transform.rotation = railObjJointMdl.transform.rotation;
-                Vector3 curRot = railObjJointMdl.transform.rotation.eulerAngles.normalized;
-                Vector3 curPos = Vector3.Scale(curRot, adjustVector);
-                mCameraMgr.mainCamObj.transform.position += curPos;
+                mCameraMgr.mainCamObj.transform.position = railObjJointMdl.BaseJoint.transform.position;
+                Vector3 curRot = railObjJointMdl.BaseJoint.transform.eulerAngles;
+                curRot.z = 0;
+                mCameraMgr.mainCamObj.transform.eulerAngles = curRot;
             }
         }
         catch (System.Exception)

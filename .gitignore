@@ -73,3 +73,5 @@ crashlytics-build.properties
 /[Aa]ssets/[Rr]esources/fbx/*
 /[Aa]ssets/[Rr]esources/prefab/*
 !*.gitkeep
+*.ini
+*.ini.meta
