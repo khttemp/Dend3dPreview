@@ -45,7 +45,6 @@ namespace RailMgrClass
                 else
                 {
                     isError = true;
-                    kasenchuObject.SetActive(false);
                 }
             }
 
@@ -296,11 +295,23 @@ namespace RailMgrClass
                     {
                         if (base_mdl_no < 254 && base_mdl_no >= 0)
                         {
+                            if (base_mdl_no >= mMain.mStageTblMgr.MdlList.Length)
+                            {
+                                mMain.DebugError("レールNo." + i + "のデフォルト架線柱(" + kasenchu_mdl_no + ") モデル番号不正(" + base_mdl_no +")");
+                                isError = true;
+                                return;
+                            }
                             kasenchu_name = mMain.mStageTblMgr.MdlList[base_mdl_no].mdl_name;
                         }
                     }
                     else if (kasenchu_mdl_no != 254 && kasenchu_mdl_no != -2)
                     {
+                        if (kasenchu_mdl_no >= mMain.mStageTblMgr.MdlList.Length)
+                        {
+                            mMain.DebugError("レールNo." + i + "の指定した架線柱 モデル番号不正(" + kasenchu_mdl_no +")");
+                            isError = true;
+                            return;
+                        }
                         kasenchu_name = mMain.mStageTblMgr.MdlList[kasenchu_mdl_no].mdl_name;
                     }
 
