@@ -18,7 +18,7 @@ namespace MainClass
     public class Main : MonoBehaviour
     {
         public StageTblMgr mStageTblMgr = new StageTblMgr();
-        public RailMgr mRailMgr = new RailMgr();
+        public RailMgr mRailMgr;
         public AMBMgr mAMBMgr = new AMBMgr();
         public string defaultPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
 
@@ -28,6 +28,9 @@ namespace MainClass
         UnityButton jumpRailButton;
         Toggle cameraToggle;
 
+        public bool isAllDebug;
+        public bool isDebug;
+
         Vector3 initPosVector = new Vector3(0.1f, 0.15f, -0.4f);
         Vector3 initRotVector = new Vector3(0f, 0f, 0f);
         
@@ -36,6 +39,7 @@ namespace MainClass
 
         public void Start()
         {
+            mRailMgr = GameObject.Find("RailMgr").GetComponent<RailMgr>();
             mCameraMgr = FindCameraMgrClass();
 
             CanvasTr = GameObject.Find("Canvas").transform;
@@ -72,6 +76,13 @@ namespace MainClass
                 if (mRailMgr.isError)
                 {
                     MessageBox.Show("レール配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    if (mRailMgr.isCheckError)
+                    {
+                        MessageBox.Show("レール繋がり異常！\nログを確認してください", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
 

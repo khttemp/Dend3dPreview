@@ -154,16 +154,7 @@ namespace CameraMgrClass
             try
             {
                 FileInfo fi = new FileInfo(iniFilePath);
-                if (!fi.Exists)
-                {
-                    WriteIniFile(fi);
-                }
-                if (!CheckIniFile(fi))
-                {
-                    fi.Delete();
-                    WriteIniFile(fi);
-                    CheckIniFile(fi);
-                }
+                CheckIniFile(fi);
             }
             catch (System.Exception ex)
             {
@@ -171,16 +162,37 @@ namespace CameraMgrClass
             }
         }
 
-        public void WriteIniFile(FileInfo fi)
+        public void WriteIniFile(FileInfo fi, string label, string value)
         {
             using (StreamWriter sw = fi.AppendText()){
-                sw.WriteLine("MOVE=0.01");
-                sw.WriteLine("ROT=3.0");
+                sw.WriteLine($"{label}={value}");
             }
         }
 
-        public bool CheckIniFile(FileInfo fi)
+        public void CheckIniFile(FileInfo fi)
         {
+            string[] findList = new string[]
+            {
+                "MOVE",
+                "ROT",
+                "ALL_DEBUG",
+                "DEBUG"
+            };
+            Dictionary<string, string> dict = new Dictionary<string, string>()
+            {
+                {"MOVE", "0.01"},
+                {"ROT", "3.0"},
+                {"ALL_DEBUG", "0"},
+                {"DEBUG", "0"}
+            };
+
+            if (!fi.Exists)
+            {
+                foreach (string label in findList)
+                {
+                    WriteIniFile(fi, label, dict[label]);
+                }
+            }
             string txtLine = "";
             using (StreamReader sr = new StreamReader(fi.OpenRead(), Encoding.UTF8)){
                 txtLine = sr.ReadToEnd();
@@ -194,6 +206,8 @@ namespace CameraMgrClass
             string[] array = txtLine.Split(separator, System.StringSplitOptions.RemoveEmptyEntries);
             bool moveFindFlag = false;
             bool rotFindFlag = false;
+            bool allDebugFlag = false;
+            bool debugFlag = false;
             for (int i = 0; i < array.Length; i++)
             {
                 if (array[i].Contains("="))
@@ -215,15 +229,40 @@ namespace CameraMgrClass
                             rotFindFlag = true;
                             ChangeCamRotText(collection[1]);
                         }
+                        else if (collection[0].Equals("ALL_DEBUG"))
+                        {
+                            allDebugFlag = true;
+                            mMain.isAllDebug = System.Convert.ToBoolean(System.Convert.ToInt32(collection[1]));
+                        }
+                        else if (collection[0].Equals("DEBUG"))
+                        {
+                            debugFlag = true;
+                            mMain.isDebug = System.Convert.ToBoolean(System.Convert.ToInt32(collection[1]));
+                        }
                     }
                 }
             }
 
-            if (!moveFindFlag || !rotFindFlag)
+            if (!moveFindFlag)
             {
-                return false;
+                WriteIniFile(fi, "MOVE", dict["MOVE"]);
+                ChangeCamMoveText(dict["MOVE"]);
             }
-            return true;
+            if (!rotFindFlag)
+            {
+                WriteIniFile(fi, "ROT", dict["ROT"]);
+                ChangeCamRotText(dict["ROT"]);
+            }
+            if (!allDebugFlag)
+            {
+                WriteIniFile(fi, "ALL_DEBUG", dict["ALL_DEBUG"]);
+                mMain.isAllDebug = System.Convert.ToBoolean(System.Convert.ToInt32(dict["ALL_DEBUG"]));
+            }
+            if (!debugFlag)
+            {
+                WriteIniFile(fi, "DEBUG", dict["DEBUG"]);
+                mMain.isDebug = System.Convert.ToBoolean(System.Convert.ToInt32(dict["DEBUG"]));
+            }
         }
 
         public float GetCamMoveText()

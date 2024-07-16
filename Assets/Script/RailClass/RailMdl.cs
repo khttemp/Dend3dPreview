@@ -11,8 +11,7 @@ namespace RailMdlClass
         public GameObject kasenchuObject;
         public int railCnt;
         public Transform[,] railTransformList;
-        public SphereCollider[] sColliderList;
-        public int[] prevRail;
-        public int[] nextRail;
+        public List<List<int[]>> prevRail;
+        public List<List<int[]>> nextRail;
     }
 }
