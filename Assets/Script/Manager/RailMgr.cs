@@ -164,17 +164,25 @@ namespace RailMgrClass
             }
         }
 
-        public void RailLineChk(int now, int rail_data_index, int bone_index, int prev, Main mMain, bool flag=false)
+        public bool RailLineChk(int now, int rail_data_index, int bone_index, int prev, Main mMain, bool flag=false)
         {
             RailMdl railMdl = railObjList[now].GetComponent<RailMdl>();
             sCollider.enabled = true;
             for (int j = 0; j < railMdl.railCnt; j++)
             {
-                Transform now_r = railMdl.railTransformList[j, bone_index];
+                Transform now_r = null;
+                try
+                {
+                    now_r = railMdl.railTransformList[j, bone_index];
+                }
+                catch (System.Exception)
+                {
+                    
+                }
                 if (now_r == null)
                 {
                     mMain.DebugError("レールNo." + now + "のボーン(" + j * 100 + ", " + bone_index + ")エラー！");
-                    return;
+                    return false;
                 }
                 sCollider.center = now_r.position;
 
@@ -189,13 +197,13 @@ namespace RailMgrClass
                         if (r == null)
                         {
                             mMain.DebugError("レールNo." + prev + "のボーン(" + l + ", " + k + ")エラー！");
-                            return;
+                            return false;
                         }
                         Transform rNext = prevRailMdl.railTransformList[l, k+1];
                         if (rNext == null)
                         {
                             mMain.DebugError("レールNo." + prev + "のボーン(" + l + ", " + k+1 + ")エラー！");
-                            return;
+                            return false;
                         }
                         if (mMain.isAllDebug)
                         {
@@ -242,6 +250,7 @@ namespace RailMgrClass
                 }
             }
             sCollider.enabled = false;
+            return true;
         }
 
         public void InitPos(int rail_index, rail_list[] rail_list_array, Main mMain)
@@ -332,7 +341,12 @@ namespace RailMgrClass
                         {
                             continue;
                         }
-                        RailLineChk(r.r[j].next.rail, j, r.r[j].next.no % 100, i, mMain, true);
+                        bool result = RailLineChk(r.r[j].next.rail, j, r.r[j].next.no % 100, i, mMain, true);
+                        if (!result)
+                        {
+                            mMain.DebugError("レールNo." + i + "の次のレール指定が不正(" + r.r[j].next.rail + ", " + r.r[j].next.no + ")");
+                            isError = true;
+                        }
                     }
                 }
             }
