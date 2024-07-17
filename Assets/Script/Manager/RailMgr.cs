@@ -360,20 +360,36 @@ namespace RailMgrClass
                     RailMdl railMdl = railObj.GetComponent<RailMdl>();
                     for (int j = 0; j < r.r.Length; j++)
                     {
-                        if (r.r[j].next.rail >= 0 && r.r[j].next.rail < mMain.mStageTblMgr.RailList.Length)
+                        if (railMdl.nextRail.Count <= j)
                         {
-                            if (railMdl.nextRail[j].Count == 0)
+                            isCheckError = true;
+                            mMain.DebugWarning("レールNo." + i + "の" + j * 100 + "側は、Nextレールが繋がっていません");
+                        }
+                        else
+                        {
+                            if (r.r[j].next.rail >= 0 && r.r[j].next.rail < mMain.mStageTblMgr.RailList.Length && railMdl.nextRail.Count > j)
                             {
-                                isCheckError = true;
-                                mMain.DebugWarning("レールNo." + i + "の" + j * 100 + "側は、Nextレールが繋がっていません");
+                                if (railMdl.nextRail[j].Count == 0)
+                                {
+                                    isCheckError = true;
+                                    mMain.DebugWarning("レールNo." + i + "の" + j * 100 + "側は、Nextレールが繋がっていません");
+                                }
                             }
                         }
-                        if (r.r[j].prev.rail >= 0 && r.r[j].prev.rail < mMain.mStageTblMgr.RailList.Length - 1)
+                        if (railMdl.prevRail.Count <= j)
                         {
-                            if (railMdl.prevRail[j].Count == 0)
+                            isCheckError = true;
+                            mMain.DebugWarning("レールNo." + i + "の" + j * 100 + "側は、prevレールが繋がっていません");
+                        }
+                        else
+                        {
+                            if (r.r[j].prev.rail >= 0 && r.r[j].prev.rail < mMain.mStageTblMgr.RailList.Length - 1)
                             {
-                                isCheckError = true;
-                                mMain.DebugWarning("レールNo." + i + "の" + j * 100 + "側は、prevレールが繋がっていません");
+                                if (railMdl.prevRail[j].Count == 0)
+                                {
+                                    isCheckError = true;
+                                    mMain.DebugWarning("レールNo." + i + "の" + j * 100 + "側は、prevレールが繋がっていません");
+                                }
                             }
                         }
                     }
