@@ -72,6 +72,7 @@ namespace MainClass
         {
             if (railFlag)
             {
+                mRailMgr.search_rail_index = -1;
                 mRailMgr.SetRailData(this);
                 if (mRailMgr.isError)
                 {

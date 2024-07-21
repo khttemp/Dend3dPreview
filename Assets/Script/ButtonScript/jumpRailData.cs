@@ -7,6 +7,7 @@ using UnityButton = UnityEngine.UI.Button;
 using MainClass;
 using JointMdlClass;
 using CameraMgrClass;
+using GetObjectLabelClass;
 
 public class jumpRailData : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class jumpRailData : MonoBehaviour
     Transform CanvasTr;
     Main mMain;
     CameraMgr mCameraMgr;
-    Vector3 adjustVector = new Vector3(0.1f, 0.15f, -0.4f);
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,12 +29,6 @@ public class jumpRailData : MonoBehaviour
         openRailButton = CanvasTr.Find("openRailButton").GetComponent<UnityButton>();
         mMain = FindMainClass();
         mCameraMgr = FindCameraMgrClass();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     Main FindMainClass()
@@ -97,18 +92,27 @@ public class jumpRailData : MonoBehaviour
         {
             if (!"".Equals(value))
             {
-                int intVal = int.Parse(value);
-                if (intVal < 0 || intVal >= mMain.mRailMgr.railObjList.Count)
+                int intVal;
+                try
                 {
-                    errorText.text = "存在しないレール番号(" + intVal + ")";
+                    intVal = int.Parse(value);
+                    if (intVal < 0 || intVal >= mMain.mRailMgr.railObjList.Count)
+                    {
+                        errorText.text = "存在しないレール番号(" + intVal + ")";
+                        return;
+                    }
+                    if ((mMain.mStageTblMgr.RailList[intVal].flg & (1U << 31)) > 0)
+                    {
+                        errorText.text = "無効レール番号(" + intVal + ")";
+                        return;
+                    }
+                    errorText.text = "";
+                }
+                catch (System.Exception)
+                {
+                    errorText.text = "数字で入力してください";
                     return;
                 }
-                if ((mMain.mStageTblMgr.RailList[intVal].flg & (1U << 31)) > 0)
-                {
-                    errorText.text = "無効レール番号(" + intVal + ")";
-                    return;
-                }
-                errorText.text = "";
 
                 foreach (Transform child in dialogObject.transform)
                 {
@@ -123,24 +127,64 @@ public class jumpRailData : MonoBehaviour
                 GameObject railObj = mMain.mRailMgr.railObjList[intVal];
                 JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
 
+                Vector3 curPos;
                 Vector3 curRot;
                 if (railObjJointMdl.BaseJoint == null)
                 {
-                    mCameraMgr.mainCamObj.transform.position = railObjJointMdl.JointList[0].transform.position;
+                    curPos = railObjJointMdl.JointList[0].transform.position;
                     curRot = railObjJointMdl.JointList[0].transform.eulerAngles;
                 }
                 else
                 {
-                    mCameraMgr.mainCamObj.transform.position = railObjJointMdl.BaseJoint.transform.position;
+                    curPos = railObjJointMdl.BaseJoint.transform.position;
                     curRot = railObjJointMdl.BaseJoint.transform.eulerAngles;
                 }
                 curRot.z = 0;
+                mCameraMgr.mainCamObj.transform.position = curPos;
                 mCameraMgr.mainCamObj.transform.eulerAngles = curRot;
+
+                mCameraMgr.mainCamObj.transform.position += mCameraMgr.mainCamObj.transform.up * 0.1f;
+                mCameraMgr.mainCamObj.transform.position -= mCameraMgr.mainCamObj.transform.forward * 0.4f;
+
+                int search_rail_index = mMain.mRailMgr.search_rail_index;
+                if (search_rail_index != intVal)
+                {
+                    if (search_rail_index != -1)
+                    {
+                        GameObject delObj = mMain.mRailMgr.railObjList[search_rail_index];
+                        JointMdl delJointMdl = delObj.GetComponent<JointMdl>();
+                        Transform delBaseMdl = delJointMdl.AllTransformChildren[1];
+                        if (delBaseMdl.gameObject.GetComponent<Outline>() != null)
+                        {
+                            GameObject.Destroy(delBaseMdl.gameObject.GetComponent<Outline>());
+                        }
+                        if (delObj.GetComponent<GetObjectLabel>() != null)
+                        {
+                            GameObject.Destroy(delObj.GetComponent<GetObjectLabel>());
+                        }
+                    }
+
+                    JointMdl jointMdl = railObj.GetComponent<JointMdl>();
+                    Transform baseMdl = jointMdl.AllTransformChildren[1];
+                    if (baseMdl.gameObject.GetComponent<Outline>() == null)
+                    {
+                        var outline = baseMdl.gameObject.AddComponent<Outline>();
+                        outline.OutlineMode = Outline.Mode.OutlineAll;
+                        outline.OutlineColor = Color.yellow;
+                        outline.OutlineWidth = 10f;
+                    }
+                    if (railObj.GetComponent<GetObjectLabel>() == null)
+                    {
+                        railObj.AddComponent<GetObjectLabel>();
+                    }
+                }
+                mMain.mRailMgr.search_rail_index = intVal;
             }
         }
-        catch (System.Exception)
+        catch (System.Exception ex)
         {
-            errorText.text = "数字で入力してください";
+            Debug.Log("予想外のエラー！");
+            Debug.Log(ex.ToString());
         }
     }
 

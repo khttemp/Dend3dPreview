@@ -9,6 +9,8 @@ namespace RailMdlClass
     public class RailMdl : MonoBehaviour
     {
         public GameObject kasenchuObject;
+        public int railNum;
+        public bool railCheck;
         public int railCnt;
         public Transform[,] railTransformList;
         public List<List<int[]>> prevRail;

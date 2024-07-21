@@ -24,12 +24,14 @@ namespace RailMgrClass
         RaycastHit hitpos;
         Transform CanvasTr;
         Toggle railCheckToggle;
+        public int search_rail_index;
         public bool isCheckError;
 
         void Start()
         {
             isError = false;
             isCheckError = false;
+            search_rail_index = -1;
             sCollider = gameObject.AddComponent<SphereCollider>();
             sCollider.radius = 0.025f;
 
@@ -50,6 +52,8 @@ namespace RailMgrClass
 
             railObj.AddComponent<RailMdl>();
             RailMdl railMdl = railObj.GetComponent<RailMdl>();
+            railMdl.railNum = rail_index;
+            railMdl.railCheck = false;
             GameObject kasenchuObject = null;
             if (kasenchu_mdl_name != null)
             {
@@ -167,6 +171,7 @@ namespace RailMgrClass
         public bool RailLineChk(int now, int rail_data_index, int bone_index, int prev, Main mMain, bool flag=false)
         {
             RailMdl railMdl = railObjList[now].GetComponent<RailMdl>();
+            railMdl.railCheck = true;
             sCollider.enabled = true;
             for (int j = 0; j < railMdl.railCnt; j++)
             {
@@ -189,6 +194,7 @@ namespace RailMgrClass
                 GameObject prevRailObj = railObjList[prev];
                 JointMdl prevJointMdl = prevRailObj.GetComponent<JointMdl>();
                 RailMdl prevRailMdl = prevRailObj.GetComponent<RailMdl>();
+                prevRailMdl.railCheck = true;
                 for (int k = 0; k < prevJointMdl.JointList.Length - 1; k++)
                 {
                     for (int l = 0; l < prevRailMdl.railCnt; l++)
