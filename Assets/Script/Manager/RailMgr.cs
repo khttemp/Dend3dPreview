@@ -224,6 +224,7 @@ namespace RailMgrClass
                                     DebugHitRail(now, prev, now_r, r, rNext, flag, hitpos);
                                 }
                                 bool sameFlag = false;
+
                                 foreach (int[] prevRail in railMdl.prevRail[j])
                                 {
                                     if (prevRail[0] == prev && prevRail[1] == (l*100 + k))
@@ -240,7 +241,7 @@ namespace RailMgrClass
                                 sameFlag = false;
                                 foreach (int[] nextRail in prevRailMdl.nextRail[l])
                                 {
-                                    if (nextRail[0] == now && nextRail[1] == (l*100))
+                                    if (nextRail[0] == now && nextRail[1] == (j*100))
                                     {
                                         sameFlag = true;
                                         break;
@@ -248,7 +249,7 @@ namespace RailMgrClass
                                 }
                                 if (!sameFlag)
                                 {
-                                    prevRailMdl.nextRail[l].Add(new int[] {now, l * 100});
+                                    prevRailMdl.nextRail[l].Add(new int[] {now, j * 100});
                                 }
                             }
                         }
