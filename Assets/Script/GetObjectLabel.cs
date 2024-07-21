@@ -68,7 +68,8 @@ namespace GetObjectLabelClass
                 return;
             }
 
-            Transform[] jointList = gameObject.GetComponent<JointMdl>().JointList;
+            JointMdl jointMdl = gameObject.GetComponent<JointMdl>();
+            Transform[] jointList = jointMdl.JointList;
             Transform trans1 = jointList[1];
 
             RailMdl railMdl = gameObject.GetComponent<RailMdl>();
@@ -112,6 +113,10 @@ namespace GetObjectLabelClass
                 }
                 mText1 += "]";
             }
+            Transform rail0Trans = jointMdl.JointList[0];
+            Transform railLastTrans = jointMdl.LastTrans;
+            mText1 += "\nDIR  0番:" + rail0Trans.rotation.eulerAngles.x.ToString() + ", " + rail0Trans.rotation.eulerAngles.y.ToString() + ", " + rail0Trans.rotation.eulerAngles.z.ToString();
+            mText1 += "\nDIR 末番:" + railLastTrans.rotation.eulerAngles.x.ToString() + ", " + railLastTrans.rotation.eulerAngles.y.ToString() + ", " + railLastTrans.rotation.eulerAngles.z.ToString();
             mSize1 = mStyle.CalcSize(new GUIContent(mText1));
 
             Vector2 guiPosition = mCamera.WorldToScreenPoint(trans1.position);
