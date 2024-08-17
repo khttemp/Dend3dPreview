@@ -124,6 +124,7 @@ namespace RailMgrClass
 			    kasenchuObject.transform.rotation = Quaternion.Euler(0f, railObjJointMdl.JointList[0].rotation.eulerAngles.y, 0f);
             }
             GetRailCnt(railMdl, railObjJointMdl, rail_index);
+            GetKasen(railMdl, railObjJointMdl, rail_index);
         }
 
         public void GetRailCnt(RailMdl railMdl, JointMdl railObjJointMdl, int rail_index)
@@ -165,6 +166,89 @@ namespace RailMgrClass
                         }
                     }
                 }
+            }
+        }
+
+        public void GetKasen(RailMdl railMdl, JointMdl railObjJointMdl, int rail_index)
+        {
+            List<Transform> findChildTransList = railObjJointMdl.AllTransformChildren;
+            railMdl.railKasenStartPosList = new Transform[railMdl.railCnt];
+            railMdl.railKasenMdlStartPosList = new Transform[railMdl.railCnt];
+            railMdl.railKasenMdlEndPosList = new Transform[railMdl.railCnt];
+            for (int i = 0; i < railMdl.railCnt; i++)
+            {
+                string rail_name = "R" + (i * 100).ToString("D3");
+                Transform railTrans = findChildTransList.Find(x => x.name.Equals(rail_name));
+                if (railTrans != null)
+                {
+                    string kasen_name = "L" + (i * 100).ToString("D3");
+                    Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
+                    for (int j = 0; j < findKasenTransList.Length; j++)
+                    {
+                        if (findKasenTransList[j].name.Contains(kasen_name))
+                        {
+                            railMdl.railKasenStartPosList[i] = findKasenTransList[j];
+                            break;
+                        }
+                    }
+
+                    string mdl_start_name = "N00";
+                    string mdl_end_name = "N01";
+                    for (int j = 0; j < findKasenTransList.Length; j++)
+                    {
+                        if (findKasenTransList[j].name.Contains(mdl_start_name))
+                        {
+                            railMdl.railKasenMdlStartPosList[i] = findKasenTransList[j];
+                        }
+                        else if (findKasenTransList[j].name.Contains(mdl_end_name))
+                        {
+                            railMdl.railKasenMdlEndPosList[i] = findKasenTransList[j];
+                        }
+                    }
+                }
+            }
+            railMdl.railKasenEndPosList = new Transform[railMdl.railCnt];
+            for (int i = 0; i < railMdl.railCnt; i++)
+            {
+                string kasen_name = "L" + (i * 100 + 1).ToString("D3");
+                int end_index = railMdl.railTransformList.Length / railMdl.railCnt - 1;
+                Transform[] findKasenTransList = railMdl.railTransformList[i, end_index].GetComponentsInChildren<Transform>(true);
+                for (int j = 0; j < findKasenTransList.Length; j++)
+                {
+                    if (findKasenTransList[j].name.Contains(kasen_name))
+                    {
+                        railMdl.railKasenEndPosList[i] = findKasenTransList[j];
+                        break;
+                    }
+                }
+            }
+            RailKasenUpdateDir(railMdl, rail_index);
+        }
+
+        public void RailKasenUpdateDir(RailMdl railMdl, int rail_index)
+        {
+            for (int i = 0; i < railMdl.railCnt; i++)
+            {
+                if (railMdl.railKasenStartPosList[i] == null)
+                {
+                    continue;
+                }
+                if (railMdl.railKasenEndPosList[i] == null)
+                {
+                    continue;
+                }
+                railMdl.railKasenStartPosList[i].LookAt(railMdl.railKasenEndPosList[i].position);
+                if (railMdl.railKasenMdlStartPosList[i] == null)
+                {
+                    continue;
+                }
+                if (railMdl.railKasenMdlEndPosList[i] == null)
+                {
+                    continue;
+                }
+                float posLength = Vector3.Distance(railMdl.railKasenStartPosList[i].position, railMdl.railKasenEndPosList[i].position);
+                float MdlLength = Vector3.Distance(railMdl.railKasenMdlStartPosList[i].position, railMdl.railKasenMdlEndPosList[i].position);
+                railMdl.railKasenStartPosList[i].localScale = new Vector3(1f, 1f, posLength / MdlLength);
             }
         }
 

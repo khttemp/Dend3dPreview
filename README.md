@@ -32,6 +32,12 @@
 
 初期値は「Dend3dPreview_Data/config.ini」で調整できます。
 
+## 最大描画距離
+
+入力した数値の距離分、描画します。初期値は1000.0です。
+
+初期値は「Dend3dPreview_Data/config.ini」で調整できます。
+
 # 余談
 
 Assetsフォルダ以外は、ほぼUnityで自動で作成されるもの。

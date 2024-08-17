@@ -13,6 +13,10 @@ namespace RailMdlClass
         public bool railCheck;
         public int railCnt;
         public Transform[,] railTransformList;
+        public Transform[] railKasenStartPosList;
+        public Transform[] railKasenEndPosList;
+        public Transform[] railKasenMdlStartPosList;
+        public Transform[] railKasenMdlEndPosList;
         public List<List<int[]>> prevRail;
         public List<List<int[]>> nextRail;
     }

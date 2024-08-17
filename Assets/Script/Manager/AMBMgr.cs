@@ -19,6 +19,9 @@ namespace AMBMgrClass
         public Dictionary<string, string[]> origin_size_per_dict;
         public Dictionary<string, string[]> size_per_dict;
         public List<string> keyList;
+        public Dictionary<string, int> origin_kasen_model_dict;
+        public Dictionary<string, int> kasen_model_dict;
+        public List<string> kasenModelList;
         public bool isError = false;
 
         public AMBMgr()
@@ -52,6 +55,43 @@ namespace AMBMgrClass
             {
                 size_per_dict.Add(keyList[i], valueList[i]);
             }
+
+            origin_kasen_model_dict = new Dictionary<string, int>(){
+                {"1Rail_HQ_Konkuri100_AMB", 1},
+                {"1Rail_HQ_Konkuri25_AMB", 1},
+                {"1Rail_HQ_Konkuri50_AMB", 1},
+                {"1Rail_Kin_100_AMB", 1},
+                {"1Rail_Kin_25_AMB", 1},
+                {"1Rail_Kin_50_AMB", 1},
+                {"2Rail_Den_100_AMB", 2},
+                {"2Rail_Den_25_AMB", 2},
+                {"2Rail_Den_50_AMB", 2},
+                {"2Rail_Kin_100_AMB", 2},
+                {"AMB_1Rail_Den_100", 1},
+                {"AMB_1Rail_Den_100_Under", 1},
+                {"AMB_1Rail_Den_25", 1},
+                {"AMB_1Rail_Den_25_Under", 1},
+                {"AMB_1Rail_Den_50", 1},
+                {"AMB_1Rail_Den_50_Konkuri", 1},
+                {"AMB_1Rail_Den_50_Under", 1},
+                {"AMB_1Rail_Den_50W", 1},
+                {"AMB_1Rail_Kin_100", 1},
+                {"AMB_1Rail_Kin_25", 1},
+                {"AMB_1Rail_Kin_50", 1},
+                {"AMB_2Rail100Only", 2},
+                {"rail_only_50", 1}
+            };
+            kasenModelList = new List<string>(origin_kasen_model_dict.Keys);
+            for (int i = 0; i < kasenModelList.Count; i++)
+            {
+                kasenModelList[i] = kasenModelList[i].ToUpper();
+            }
+            List<int> kasenValueList = new List<int>(origin_kasen_model_dict.Values);
+            kasen_model_dict = new Dictionary<string, int>();
+            for (int i = 0; i < kasenValueList.Count; i++)
+            {
+                kasen_model_dict.Add(kasenModelList[i], kasenValueList[i]);
+            }
         }
 
         public void CreateAMB(int amb_index, int child_index, int rail_no, string mdl_name, amb_data ambData, Main mMain)
@@ -84,6 +124,8 @@ namespace AMBMgrClass
             ambMdl.ParentAmbIndex = ambData.parentindex;
             ambMdl.ChildIndex = child_index;
             ambMdl.KasenChuScale = ambData.size_per;
+            ambMdl.isExistKasen = false;
+            ambMdl.kasenCnt = 0;
 
             if (keyList.Contains(ambJointModel.Name.ToUpper()))
             {
@@ -101,6 +143,12 @@ namespace AMBMgrClass
                 ambMdlList = ambObjList[amb_index];
             }
             ambMdlList.Add(ambObj);
+
+            if (kasenModelList.Contains(ambJointModel.Name.ToUpper()))
+            {
+                ambMdl.isExistKasen = true;
+                ambMdl.kasenCnt = kasen_model_dict[ambJointModel.Name.ToUpper()];
+            }
         }
 
         public void SetScale(GameObject ambObj, float scale, string name, string[] infoList)
@@ -265,6 +313,97 @@ namespace AMBMgrClass
             ambObjJointMdl.UpdateBaseRot(true);
             ambObjJointMdl.UpdateJointDir();
             ambObjJointMdl.old_joint_dir = ambObjJointMdl.JointDir;
+            if (ambMdl.isExistKasen)
+            {
+                GetAmbKasen(ambMdl, ambObjJointMdl);
+            }
+        }
+
+        public void GetAmbKasen(AmbMdl ambMdl, JointMdl ambJointMdl)
+        {
+            List<Transform> findChildTransList = ambJointMdl.AllTransformChildren;
+            ambMdl.railKasenStartPosList = new Transform[ambMdl.kasenCnt];
+            ambMdl.railKasenMdlStartPosList = new Transform[ambMdl.kasenCnt];
+            ambMdl.railKasenMdlEndPosList = new Transform[ambMdl.kasenCnt];
+            for (int i = 0; i < ambMdl.kasenCnt; i++)
+            {
+                string rail_name = "R" + (i * 100).ToString("D3");
+                Transform railTrans = findChildTransList.Find(x => x.name.Equals(rail_name));
+                if (railTrans != null)
+                {
+                    string kasen_name = "L" + (i * 100).ToString("D3");
+                    Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
+                    for (int j = 0; j < findKasenTransList.Length; j++)
+                    {
+                        if (findKasenTransList[j].name.Contains(kasen_name))
+                        {
+                            ambMdl.railKasenStartPosList[i] = findKasenTransList[j];
+                            break;
+                        }
+                    }
+
+                    string mdl_start_name = "N00";
+                    string mdl_end_name = "N01";
+                    for (int j = 0; j < findKasenTransList.Length; j++)
+                    {
+                        if (findKasenTransList[j].name.Contains(mdl_start_name))
+                        {
+                            ambMdl.railKasenMdlStartPosList[i] = findKasenTransList[j];
+                        }
+                        else if (findKasenTransList[j].name.Contains(mdl_end_name))
+                        {
+                            ambMdl.railKasenMdlEndPosList[i] = findKasenTransList[j];
+                        }
+                    }
+                }
+            }
+            ambMdl.railKasenEndPosList = new Transform[ambMdl.kasenCnt];
+            for (int i = 0; i < ambMdl.kasenCnt; i++)
+            {
+                string rail_name = "R" + (i * 100 + ambJointMdl.JointList.Length - 1).ToString("D3");
+                Transform railTrans = findChildTransList.Find(x => x.name.Equals(rail_name));
+                if (railTrans != null)
+                {
+                    string kasen_name = "L" + (i * 100 + 1).ToString("D3");
+                    Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
+                    for (int j = 0; j < findKasenTransList.Length; j++)
+                    {
+                        if (findKasenTransList[j].name.Contains(kasen_name))
+                        {
+                            ambMdl.railKasenEndPosList[i] = findKasenTransList[j];
+                            break;
+                        }
+                    }
+                }
+            }
+            AmbRailKasenUpdateDir(ambMdl);
+        }
+
+        public void AmbRailKasenUpdateDir(AmbMdl ambMdl)
+        {
+            for (int i = 0; i < ambMdl.kasenCnt; i++)
+            {
+                if (ambMdl.railKasenStartPosList[i] == null)
+                {
+                    continue;
+                }
+                if (ambMdl.railKasenEndPosList[i] == null)
+                {
+                    continue;
+                }
+                ambMdl.railKasenStartPosList[i].LookAt(ambMdl.railKasenEndPosList[i].position);
+                if (ambMdl.railKasenMdlStartPosList[i] == null)
+                {
+                    continue;
+                }
+                if (ambMdl.railKasenMdlEndPosList[i] == null)
+                {
+                    continue;
+                }
+                float posLength = Vector3.Distance(ambMdl.railKasenStartPosList[i].position, ambMdl.railKasenEndPosList[i].position);
+                float MdlLength = Vector3.Distance(ambMdl.railKasenMdlStartPosList[i].position, ambMdl.railKasenMdlEndPosList[i].position);
+                ambMdl.railKasenStartPosList[i].localScale = new Vector3(1f, 1f, posLength / MdlLength);
+            }
         }
 
         public GameObject Search(int amb_index, int parent_index)

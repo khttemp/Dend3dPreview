@@ -12,9 +12,11 @@ namespace CameraMgrClass
     public class CameraMgr : MonoBehaviour
     {
         public GameObject mainCamObj;
+        public new Camera camera;
         Transform CanvasTr;
         InputField camMoveInputField;
         InputField camRotInputField;
+        InputField camFarInputField;
         Main mMain;
 
         string iniFilePath;
@@ -30,10 +32,14 @@ namespace CameraMgrClass
         {
             mMain = FindMainClass();
             mainCamObj = GameObject.FindGameObjectWithTag("MainCamera");
+            camera = mainCamObj.GetComponent<Camera>();
             CanvasTr = GameObject.Find("Canvas").transform;
 
             camMoveInputField = CanvasTr.Find("MoveInputField").GetComponent<InputField>();
             camRotInputField = CanvasTr.Find("RotInputField").GetComponent<InputField>();
+            camFarInputField = CanvasTr.Find("FarInputField").GetComponent<InputField>();
+            camFarInputField.onEndEdit.AddListener(UpdateCamFar);
+
             iniFilePath = UnityEngine.Application.dataPath + "/" + "config.ini";
             OpenIniFile();
 
@@ -175,6 +181,7 @@ namespace CameraMgrClass
             {
                 "MOVE",
                 "ROT",
+                "FAR",
                 "ALL_DEBUG",
                 "DEBUG"
             };
@@ -182,6 +189,7 @@ namespace CameraMgrClass
             {
                 {"MOVE", "0.01"},
                 {"ROT", "3.0"},
+                {"FAR", "1000.0"},
                 {"ALL_DEBUG", "0"},
                 {"DEBUG", "0"}
             };
@@ -206,6 +214,7 @@ namespace CameraMgrClass
             string[] array = txtLine.Split(separator, System.StringSplitOptions.RemoveEmptyEntries);
             bool moveFindFlag = false;
             bool rotFindFlag = false;
+            bool farFindFlag = false;
             bool allDebugFlag = false;
             bool debugFlag = false;
             for (int i = 0; i < array.Length; i++)
@@ -228,6 +237,11 @@ namespace CameraMgrClass
                         {
                             rotFindFlag = true;
                             ChangeCamRotText(collection[1]);
+                        }
+                        else if (collection[0].Equals("FAR"))
+                        {
+                            farFindFlag = true;
+                            ChangeCamFarText(collection[1]);
                         }
                         else if (collection[0].Equals("ALL_DEBUG"))
                         {
@@ -252,6 +266,11 @@ namespace CameraMgrClass
             {
                 WriteIniFile(fi, "ROT", dict["ROT"]);
                 ChangeCamRotText(dict["ROT"]);
+            }
+            if (!farFindFlag)
+            {
+                WriteIniFile(fi, "FAR", dict["FAR"]);
+                ChangeCamFarText(dict["FAR"]);
             }
             if (!allDebugFlag)
             {
@@ -301,6 +320,25 @@ namespace CameraMgrClass
         public void ChangeCamRotText(string text)
         {
             camRotInputField.text = text;
+        }
+
+        public void ChangeCamFarText(string text)
+        {
+            camFarInputField.text = text;
+            UpdateCamFar(text);
+        }
+
+        public void UpdateCamFar(string text)
+        {
+            try
+            {
+                float far = System.Single.Parse(text);
+                camera.farClipPlane = far;
+            }
+            catch (System.Exception)
+            {
+
+            }
         }
     }
 }
