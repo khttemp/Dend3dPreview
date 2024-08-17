@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 using MainClass;
 using MdlMgrClass;
@@ -148,6 +149,33 @@ namespace AMBMgrClass
             {
                 ambMdl.isExistKasen = true;
                 ambMdl.kasenCnt = kasen_model_dict[ambJointModel.Name.ToUpper()];
+            }
+
+            MeshRenderer[] ambMeshList = ambObj.transform.GetComponentsInChildren<MeshRenderer>(true);
+            if (ambMeshList != null)
+            {
+                for (int i = 0; i < ambMeshList.Length; i++)
+                {
+                    ambMeshList[i].lightProbeUsage = LightProbeUsage.Off;
+                    ambMeshList[i].reflectionProbeUsage = ReflectionProbeUsage.Off;
+                    ambMeshList[i].shadowCastingMode = ShadowCastingMode.Off;
+                    ambMeshList[i].receiveShadows = false;
+                }
+            }
+            SkinnedMeshRenderer[] ambSkinnedMeshList = ambObj.transform.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            if (ambSkinnedMeshList != null)
+            {
+                for (int i = 0; i < ambSkinnedMeshList.Length; i++)
+                {
+                    ambSkinnedMeshList[i].lightProbeUsage = LightProbeUsage.Off;
+                    ambSkinnedMeshList[i].reflectionProbeUsage = ReflectionProbeUsage.Off;
+                    ambSkinnedMeshList[i].shadowCastingMode = ShadowCastingMode.Off;
+                    ambSkinnedMeshList[i].receiveShadows = false;
+                    if (ambSkinnedMeshList[i].sharedMesh != null)
+                    {
+                        ambSkinnedMeshList[i].sharedMesh.RecalculateBounds();
+                    }
+                }
             }
         }
 
@@ -328,31 +356,36 @@ namespace AMBMgrClass
             for (int i = 0; i < ambMdl.kasenCnt; i++)
             {
                 string rail_name = "R" + (i * 100).ToString("D3");
-                Transform railTrans = findChildTransList.Find(x => x.name.Equals(rail_name));
-                if (railTrans != null)
+                List<Transform> railTransList = findChildTransList.FindAll(x => x.name.Contains(rail_name));
+                if (railTransList != null)
                 {
-                    string kasen_name = "L" + (i * 100).ToString("D3");
-                    Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
-                    for (int j = 0; j < findKasenTransList.Length; j++)
+                    foreach (Transform railTrans in railTransList)
                     {
-                        if (findKasenTransList[j].name.Contains(kasen_name))
+                        string kasen_name = "L" + (i * 100).ToString("D3");
+                        string mdl_start_name = "N00";
+                        string mdl_end_name = "N01";
+                        Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
+                        ambMdl.railKasenStartPosList[i] = null;
+                        ambMdl.railKasenMdlStartPosList[i] = null;
+                        ambMdl.railKasenMdlEndPosList[i] = null;
+                        for (int j = 0; j < findKasenTransList.Length; j++)
                         {
-                            ambMdl.railKasenStartPosList[i] = findKasenTransList[j];
+                            if (findKasenTransList[j].name.Contains(kasen_name))
+                            {
+                                ambMdl.railKasenStartPosList[i] = findKasenTransList[j];
+                            }
+                            else if (findKasenTransList[j].name.Contains(mdl_start_name))
+                            {
+                                ambMdl.railKasenMdlStartPosList[i] = findKasenTransList[j];
+                            }
+                            else if (findKasenTransList[j].name.Contains(mdl_end_name))
+                            {
+                                ambMdl.railKasenMdlEndPosList[i] = findKasenTransList[j];
+                            }
+                        }
+                        if (ambMdl.railKasenStartPosList[i] != null && ambMdl.railKasenMdlStartPosList[i] != null && ambMdl.railKasenMdlEndPosList[i] != null)
+                        {
                             break;
-                        }
-                    }
-
-                    string mdl_start_name = "N00";
-                    string mdl_end_name = "N01";
-                    for (int j = 0; j < findKasenTransList.Length; j++)
-                    {
-                        if (findKasenTransList[j].name.Contains(mdl_start_name))
-                        {
-                            ambMdl.railKasenMdlStartPosList[i] = findKasenTransList[j];
-                        }
-                        else if (findKasenTransList[j].name.Contains(mdl_end_name))
-                        {
-                            ambMdl.railKasenMdlEndPosList[i] = findKasenTransList[j];
                         }
                     }
                 }

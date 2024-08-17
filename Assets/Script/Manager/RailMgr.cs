@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
 
 using MainClass;
 using MdlMgrClass;
@@ -66,6 +67,29 @@ namespace RailMgrClass
                 else
                 {
                     isError = true;
+                }
+            }
+
+            MeshRenderer[] railMeshList = railObj.transform.GetComponentsInChildren<MeshRenderer>(true);
+            if (railMeshList != null)
+            {
+                for (int i = 0; i < railMeshList.Length; i++)
+                {
+                    railMeshList[i].lightProbeUsage = LightProbeUsage.Off;
+                    railMeshList[i].reflectionProbeUsage = ReflectionProbeUsage.Off;
+                    railMeshList[i].shadowCastingMode = ShadowCastingMode.Off;
+                    railMeshList[i].receiveShadows = false;
+                }
+            }
+            SkinnedMeshRenderer[] railSkinnedMeshList = railObj.transform.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+            if (railSkinnedMeshList != null)
+            {
+                for (int i = 0; i < railSkinnedMeshList.Length; i++)
+                {
+                    railSkinnedMeshList[i].lightProbeUsage = LightProbeUsage.Off;
+                    railSkinnedMeshList[i].reflectionProbeUsage = ReflectionProbeUsage.Off;
+                    railSkinnedMeshList[i].shadowCastingMode = ShadowCastingMode.Off;
+                    railSkinnedMeshList[i].receiveShadows = false;
                 }
             }
 
@@ -178,31 +202,36 @@ namespace RailMgrClass
             for (int i = 0; i < railMdl.railCnt; i++)
             {
                 string rail_name = "R" + (i * 100).ToString("D3");
-                Transform railTrans = findChildTransList.Find(x => x.name.Equals(rail_name));
-                if (railTrans != null)
+                List<Transform> railTransList = findChildTransList.FindAll(x => x.name.Contains(rail_name));
+                if (railTransList != null)
                 {
-                    string kasen_name = "L" + (i * 100).ToString("D3");
-                    Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
-                    for (int j = 0; j < findKasenTransList.Length; j++)
+                    foreach (Transform railTrans in railTransList)
                     {
-                        if (findKasenTransList[j].name.Contains(kasen_name))
+                        string kasen_name = "L" + (i * 100).ToString("D3");
+                        string mdl_start_name = "N00";
+                        string mdl_end_name = "N01";
+                        Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
+                        railMdl.railKasenStartPosList[i] = null;
+                        railMdl.railKasenMdlStartPosList[i] = null;
+                        railMdl.railKasenMdlEndPosList[i] = null;
+                        for (int j = 0; j < findKasenTransList.Length; j++)
                         {
-                            railMdl.railKasenStartPosList[i] = findKasenTransList[j];
+                            if (findKasenTransList[j].name.Contains(kasen_name))
+                            {
+                                railMdl.railKasenStartPosList[i] = findKasenTransList[j];
+                            }
+                            else if (findKasenTransList[j].name.Contains(mdl_start_name))
+                            {
+                                railMdl.railKasenMdlStartPosList[i] = findKasenTransList[j];
+                            }
+                            else if (findKasenTransList[j].name.Contains(mdl_end_name))
+                            {
+                                railMdl.railKasenMdlEndPosList[i] = findKasenTransList[j];
+                            }
+                        }
+                        if (railMdl.railKasenStartPosList[i] != null && railMdl.railKasenMdlStartPosList[i] != null && railMdl.railKasenMdlEndPosList[i] != null)
+                        {
                             break;
-                        }
-                    }
-
-                    string mdl_start_name = "N00";
-                    string mdl_end_name = "N01";
-                    for (int j = 0; j < findKasenTransList.Length; j++)
-                    {
-                        if (findKasenTransList[j].name.Contains(mdl_start_name))
-                        {
-                            railMdl.railKasenMdlStartPosList[i] = findKasenTransList[j];
-                        }
-                        else if (findKasenTransList[j].name.Contains(mdl_end_name))
-                        {
-                            railMdl.railKasenMdlEndPosList[i] = findKasenTransList[j];
                         }
                     }
                 }
