@@ -27,6 +27,10 @@ namespace RailMgrClass
         Toggle railCheckToggle;
         public int search_rail_index;
         public bool isCheckError;
+        Toggle stationBoundsToggle;
+        Toggle comicBoundsToggle;
+        public List<GameObject> stationBoundsList = new List<GameObject>();
+        public List<GameObject> comicBoundsList = new List<GameObject>();
 
         void Start()
         {
@@ -38,6 +42,10 @@ namespace RailMgrClass
 
             CanvasTr = GameObject.Find("Canvas").transform;
             railCheckToggle = CanvasTr.Find("railCheckToggle").GetComponent<Toggle>();
+            stationBoundsToggle = CanvasTr.Find("stationBoundsToggle").GetComponent<Toggle>();
+            stationBoundsToggle.onValueChanged.AddListener(StationChange);
+            comicBoundsToggle = CanvasTr.Find("comicBoundsToggle").GetComponent<Toggle>();
+            comicBoundsToggle.onValueChanged.AddListener(ComicChange);
         }
 
         public void CreateRail(int rail_index, string mdl_name, string kasenchu_mdl_name, Main mMain)
@@ -517,6 +525,222 @@ namespace RailMgrClass
             }
         }
 
+        public void SetStationBoxCollider(Main mMain)
+        {
+            stationBoundsList.Clear();
+            Vector3 initSize = new Vector3(1f, 1f, 1f);
+            Vector3 initCenter = new Vector3(0f, 0f, 0.5f);
+            for (int i = 0; i < mMain.mStageTblMgr.StList.Length; i++)
+            {
+                int railNo = mMain.mStageTblMgr.StList[i].Rail;
+                if (railNo < 0 || railNo >= railObjList.Count)
+                {
+                    continue;
+                }
+                GameObject railObj = railObjList[railNo];
+                GameObject eventObj = new GameObject("st_" + i);
+                eventObj.transform.parent = railObj.transform;
+                eventObj.transform.localScale = Vector3.one;
+                Vector3 offset = Vector3.zero;
+                offset.z = mMain.mStageTblMgr.StList[i].Offset / 100f;
+                eventObj.transform.localPosition = offset;
+                eventObj.transform.localRotation = Quaternion.identity;
+
+                GameObject centerObj = new GameObject("st_center_" + i);
+                centerObj.transform.parent = eventObj.transform;
+                centerObj.transform.localScale = Vector3.one;
+                centerObj.transform.localPosition = new Vector3(0f, 0f, 0.5f);
+                centerObj.transform.localRotation = Quaternion.identity;
+                BoxCollider stBox = eventObj.AddComponent<BoxCollider>();
+                stBox.size = initSize;
+                stBox.center = initCenter;
+
+                GameObject boundsObj = new GameObject("st_bounds_" + i);
+                boundsObj.transform.parent = centerObj.transform;
+                boundsObj.transform.localScale = Vector3.one;
+                boundsObj.transform.position = centerObj.transform.position;
+                BoxCollider stBoxBounds = boundsObj.AddComponent<BoxCollider>();
+                stBoxBounds.size = Vector3.one;
+                stationBoundsList.Add(boundsObj);
+                bool result = calcBounds(stBoxBounds, boundsObj.transform, i, "駅", mMain);
+                if (!result)
+                {
+                    stBoxBounds.size = Vector3.one;
+                }
+                else
+                {
+                    string stName = "駅_" + i;
+                    if (mMain.mStageTblMgr.StList[i].StationName != null)
+                    {
+                        stName += "\n" + mMain.mStageTblMgr.StList[i].StationName;
+                    }
+                    string textCubePath = "dialogPrefab/TextCube";
+                    GameObject textCubeObj = (UnityEngine.Object.Instantiate(Resources.Load(textCubePath)) as GameObject);
+                    textCubeObj.name = textCubeObj.name.Replace("(Clone)", "");
+                    textCubeObj.transform.parent = centerObj.transform;
+                    textCubeObj.transform.position = centerObj.transform.position;
+                    textCubeObj.transform.localScale = stBoxBounds.size;
+                    TextMesh textMesh = textCubeObj.transform.Find("InputText").GetComponent<TextMesh>();
+                    textMesh.text = stName;
+                    Renderer cubeRenderer = textCubeObj.GetComponent<Renderer>();
+                    cubeRenderer.material.color = new Color(0f, 0.8f, 0f, 0.25f);
+                    textCubeObj.SetActive(stationBoundsToggle.isOn);
+                    stationBoundsList.Add(textCubeObj);
+                }
+            }
+        }
+
+        public void SetComicScriptBoxCollider(Main mMain)
+        {
+            comicBoundsList.Clear();
+            Vector3 initSize = new Vector3(1f, 1f, 1f);
+            Vector3 initCenter = new Vector3(0f, 0f, 0.5f);
+            for (int i = 0; i < mMain.mStageTblMgr.EventList.Length; i++)
+            {
+                int railNo = mMain.mStageTblMgr.EventList[i].rail_no;
+                if (railNo < 0 || railNo >= railObjList.Count)
+                {
+                    continue;
+                }
+                GameObject railObj = railObjList[railNo];
+                GameObject eventObj = new GameObject("comic_" + i);
+                eventObj.transform.parent = railObj.transform;
+                eventObj.transform.localScale = Vector3.one;
+                Vector3 offset = Vector3.zero;
+                offset.z = mMain.mStageTblMgr.EventList[i].offset / 100f;
+                eventObj.transform.localPosition = offset;
+                eventObj.transform.localRotation = Quaternion.identity;
+
+                GameObject centerObj = new GameObject("comic_center_" + i);
+                centerObj.transform.parent = eventObj.transform;
+                centerObj.transform.localScale = Vector3.one;
+                centerObj.transform.localPosition = new Vector3(0f, 0f, 0.5f);
+                centerObj.transform.localRotation = Quaternion.identity;
+                BoxCollider stBox = eventObj.AddComponent<BoxCollider>();
+                stBox.size = initSize;
+                stBox.center = initCenter;
+
+                GameObject boundsObj = new GameObject("comic_bounds_" + i);
+                boundsObj.transform.parent = centerObj.transform;
+                boundsObj.transform.localScale = Vector3.one;
+                boundsObj.transform.position = centerObj.transform.position;
+                BoxCollider stBoxBounds = boundsObj.AddComponent<BoxCollider>();
+                stBoxBounds.size = Vector3.one;
+                comicBoundsList.Add(boundsObj);
+                bool result = calcBounds(stBoxBounds, boundsObj.transform, i, "スクリプト", mMain);
+                if (!result)
+                {
+                    stBoxBounds.size = Vector3.one;
+                }
+                else
+                {
+                    string comicName = "スクリプト\n" + mMain.mStageTblMgr.EventList[i].event_no;
+                    string textCubePath = "dialogPrefab/TextCube";
+                    GameObject textCubeObj = (UnityEngine.Object.Instantiate(Resources.Load(textCubePath)) as GameObject);
+                    textCubeObj.name = textCubeObj.name.Replace("(Clone)", "");
+                    textCubeObj.transform.parent = centerObj.transform;
+                    textCubeObj.transform.position = centerObj.transform.position;
+                    textCubeObj.transform.localScale = stBoxBounds.size;
+                    TextMesh textMesh = textCubeObj.transform.Find("InputText").GetComponent<TextMesh>();
+                    textMesh.text = comicName;
+                    Renderer cubeRenderer = textCubeObj.GetComponent<Renderer>();
+                    cubeRenderer.material.color = new Color(0f, 0f, 0.6f, 0.25f);
+                    textCubeObj.SetActive(comicBoundsToggle.isOn);
+                    comicBoundsList.Add(textCubeObj);
+                }
+            }
+        }
+
+        public bool calcBounds(BoxCollider box, Transform transform, int i, string name, Main mMain)
+        {
+            float newX = box.size.x;
+            float newY = box.size.y;
+            float newZ = box.size.z;
+            float rotX = transform.localRotation.eulerAngles.x;
+            if (rotX > 180)
+            {
+                rotX = Mathf.Abs(rotX - 360);
+            }
+            float rotY = Mathf.Abs(transform.localRotation.eulerAngles.y);
+            if (rotY > 180)
+            {
+                rotY = Mathf.Abs(rotY - 360);
+            }
+            float rotZ = Mathf.Abs(transform.localRotation.eulerAngles.z);
+            if (rotZ > 180)
+            {
+                rotZ = Mathf.Abs(rotZ - 360);
+            }
+            // rotate Y
+            if (rotY <= 90)
+            {
+                newX = box.size.x * Mathf.Cos(rotY * Mathf.Deg2Rad) + box.size.z * Mathf.Sin(rotY * Mathf.Deg2Rad);
+                newZ = box.size.x * Mathf.Sin(rotY * Mathf.Deg2Rad) + box.size.z * Mathf.Cos(rotY * Mathf.Deg2Rad);
+            }
+            else
+            {
+                newX = box.size.z * Mathf.Sin(rotY * Mathf.Deg2Rad) - box.size.x * Mathf.Cos(rotY * Mathf.Deg2Rad);
+                newZ = box.size.x * Mathf.Sin(rotY * Mathf.Deg2Rad) - box.size.z * Mathf.Cos(rotY * Mathf.Deg2Rad);
+            }
+            if (newX < 0f || newZ < 0f)
+            {
+                mMain.DebugWarning(i + "番目の" + name +"のBoxColliderのbounds計算失敗! rotate Y(" + rotY + ")");
+                return false;
+            }
+            box.size = new Vector3(newX, box.size.y, newZ);
+            // rotate X
+            if (rotX <= 90)
+            {
+                newY = box.size.y * Mathf.Cos(rotX * Mathf.Deg2Rad) + box.size.z * Mathf.Sin(rotX * Mathf.Deg2Rad);
+                newZ = box.size.y * Mathf.Sin(rotX * Mathf.Deg2Rad) + box.size.z * Mathf.Cos(rotX * Mathf.Deg2Rad);
+            }
+            else
+            {
+                newY = box.size.z * Mathf.Sin(rotX * Mathf.Deg2Rad) - box.size.y * Mathf.Cos(rotX * Mathf.Deg2Rad);
+                newZ = box.size.y * Mathf.Sin(rotX * Mathf.Deg2Rad) - box.size.z * Mathf.Cos(rotX * Mathf.Deg2Rad);
+            }
+            if (newY < 0f || newZ < 0f)
+            {
+                mMain.DebugWarning(i + "番目の" + name +"のBoxColliderのbounds計算失敗! rotateX!(" + rotX + ")");
+                return false;
+            }
+            box.size = new Vector3(box.size.x, newY, newZ);
+            // rotate Z
+            if (rotZ <= 90)
+            {
+                newX = box.size.x * Mathf.Cos(rotZ * Mathf.Deg2Rad) + box.size.y * Mathf.Sin(rotZ * Mathf.Deg2Rad);
+                newY = box.size.x * Mathf.Sin(rotZ * Mathf.Deg2Rad) + box.size.y * Mathf.Cos(rotZ * Mathf.Deg2Rad);
+            }
+            else
+            {
+                newX = box.size.y * Mathf.Sin(rotZ * Mathf.Deg2Rad) - box.size.x * Mathf.Cos(rotZ * Mathf.Deg2Rad);
+                newY = box.size.x * Mathf.Sin(rotZ * Mathf.Deg2Rad) - box.size.y * Mathf.Cos(rotZ * Mathf.Deg2Rad);
+            }
+            if (newX < 0f || newY < 0f)
+            {
+                mMain.DebugWarning(i + "番目の" + name +"のBoxColliderのbounds計算失敗! rotateZ!(" + rotZ + ")");
+                return false;
+            }
+            box.size = new Vector3(newX, newY, box.size.z);
+            return true;
+        }
+
+        public void StationChange(bool state)
+        {
+            for (int i = 0; i < stationBoundsList.Count; i++)
+            {
+                stationBoundsList[i].SetActive(state);
+            }
+        }
+
+        public void ComicChange(bool state)
+        {
+            for (int i = 0; i < comicBoundsList.Count; i++)
+            {
+                comicBoundsList[i].SetActive(state);
+            }
+        }
+
         public void SetRailData(Main mMain)
         {
             try
@@ -569,6 +793,8 @@ namespace RailMgrClass
                 {
                     RailAllCheck(mMain);
                 }
+                SetStationBoxCollider(mMain);
+                SetComicScriptBoxCollider(mMain);
             }
             catch (System.Exception e)
             {

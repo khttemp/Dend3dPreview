@@ -18,7 +18,6 @@ namespace GetObjectLabelClass
 
         Canvas canvas;
         Transform CanvasTr;
-        Toggle railCheckToggle;
         Toggle railLabelToggle;
 
         private void Start()
@@ -43,7 +42,6 @@ namespace GetObjectLabelClass
 
             canvas = FindCanvasClass();
             CanvasTr = canvas.transform;
-            railCheckToggle = CanvasTr.Find("railCheckToggle").GetComponent<Toggle>();
             railLabelToggle = CanvasTr.Find("railLabelToggle").GetComponent<Toggle>();
         }
 

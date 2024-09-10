@@ -28,6 +28,9 @@ namespace MainClass
         UnityButton jumpRailButton;
         Toggle cameraToggle;
 
+        GameObject loadingPanel;
+        Text loadingText;
+
         public bool isAllDebug;
         public bool isDebug;
 
@@ -46,6 +49,12 @@ namespace MainClass
             openRailOnlyAmbButton = CanvasTr.Find("openRailOnlyAmbButton").GetComponent<UnityButton>();
             jumpRailButton = CanvasTr.Find("jumpRailButton").GetComponent<UnityButton>();
             cameraToggle = CanvasTr.Find("cameraToggle").GetComponent<Toggle>();
+
+            string loadingPanelPath = "dialogPrefab/LoadingPanel";
+            loadingPanel = (UnityEngine.Object.Instantiate(Resources.Load(loadingPanelPath)) as GameObject);
+            loadingPanel.name = loadingPanel.name.Replace("(Clone)", "");
+            loadingPanel.transform.SetParent(CanvasTr, false);
+            loadingText = loadingPanel.transform.Find("LoadingText").GetComponent<Text>();
 
             SetDeactiveButton();
         }
@@ -70,8 +79,15 @@ namespace MainClass
 
         public void SetDrawModel(bool railFlag, bool ambFlag)
         {
+            StartCoroutine(_SetDrawModel(railFlag, ambFlag));
+        }
+
+        public IEnumerator _SetDrawModel(bool railFlag, bool ambFlag)
+        {
             if (railFlag)
             {
+                SetPanelText("レール\n読み込み中...");
+                yield return null;
                 mRailMgr.search_rail_index = -1;
                 mRailMgr.SetRailData(this);
                 if (mRailMgr.isError)
@@ -89,6 +105,8 @@ namespace MainClass
 
             if (ambFlag)
             {
+                SetPanelText("AMB\n読み込み中...");
+                yield return null;
                 mAMBMgr.SetAmbData(this);
                 if (mAMBMgr.isError)
                 {
@@ -99,6 +117,8 @@ namespace MainClass
             {
                 mAMBMgr.RemoveAMB();
             }
+            SetPanelText("");
+            yield return null;
             SetInitCamera();
         }
 
@@ -114,6 +134,12 @@ namespace MainClass
 
         public void DebugError(string message)
         {
+#if UNITY_EDITOR
+            sw = new StreamWriter(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "error.log"), true, Encoding.UTF8);
+            sw.Write(string.Format("[{0}][ERROR]：", System.DateTime.Now.ToString(datetimePattern)));
+            sw.WriteLine(message);
+            sw.Close();
+#else
             try 
             {
                 string ERROR_PATH = Path.Combine(System.Windows.Forms.Application.StartupPath, "error.log");
@@ -131,14 +157,21 @@ namespace MainClass
                 sw.WriteLine(message);
                 sw.Close();
             }
+#endif
         }
 
         public void DebugWarning(string message)
         {
+#if UNITY_EDITOR
+                sw = new StreamWriter(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "warning.log"), true, Encoding.UTF8);
+                sw.Write(string.Format("[{0}][WARNING]：", System.DateTime.Now.ToString(datetimePattern)));
+                sw.WriteLine(message);
+                sw.Close();
+#else
             try 
             {
-                string ERROR_PATH = Path.Combine(System.Windows.Forms.Application.StartupPath, "warning.log");
-                sw = new StreamWriter(ERROR_PATH, true, Encoding.UTF8);
+                string WARNING_PATH = Path.Combine(System.Windows.Forms.Application.StartupPath, "warning.log");
+                sw = new StreamWriter(WARNING_PATH, true, Encoding.UTF8);
                 sw.Write(string.Format("[{0}][WARNING]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(message);
                 sw.Close();
@@ -151,6 +184,21 @@ namespace MainClass
                 sw.Write(string.Format("[{0}][WARNING]：", System.DateTime.Now.ToString(datetimePattern)));
                 sw.WriteLine(message);
                 sw.Close();
+            }
+#endif
+        }
+
+        public void SetPanelText(string text)
+        {
+            if (text == null || "".Equals(text))
+            {
+                loadingPanel.SetActive(false);
+                loadingText.text = "";
+            }
+            else
+            {
+                loadingPanel.SetActive(true);
+                loadingText.text = text;
             }
         }
     }
