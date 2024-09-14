@@ -15,6 +15,14 @@ namespace FileReadMgrClass
     public class FileReadMgr
     {
         Dictionary<string, string> mdlMap;
+        Dictionary<string, string> sheetMap = new Dictionary<string, string>()
+        {
+            {"駅名", "STCnt:"},
+            {"コミックスクリプト", "ComicScript:"},
+            {"モデル情報", "MdlCnt:"},
+            {"レール情報", "RailCnt:"},
+            {"AMB情報", "AmbCnt:"}
+        };
 
         public void Read(Main mMain, bool railFlag, bool ambFlag)
         {
@@ -77,14 +85,35 @@ namespace FileReadMgrClass
         {
             mMain.SetPanelText("エクセルファイル\n読み込み中...");
             yield return null;
+            List<string> sheetKeyList = new List<string>(sheetMap.Keys);
+            bool defaultXlsx = true;
             Workbook workbook = new Workbook(filePath);
             mdlMap = new Dictionary<string, string>();
+            for (int i = 0; i < sheetKeyList.Count; i++)
+            {
+                if (!workbook.Worksheets.Exists(x => x.Name.Equals(sheetKeyList[i])))
+                {
+                    defaultXlsx = false;
+                    break;
+                }
+            }
             string fileContent = string.Empty;
-            fileContent += GetSheetInfo(mMain, workbook, "駅名", "STCnt:", false);
-            fileContent += GetSheetInfo(mMain, workbook, "コミックスクリプト", "ComicScript:", false);
-            fileContent += GetSheetInfo(mMain, workbook, "モデル情報", "MdlCnt:", false);
-            fileContent += GetSheetInfo(mMain, workbook, "レール情報", "RailCnt:", true);
-            fileContent += GetSheetInfo(mMain, workbook, "AMB情報", "AmbCnt:", true);
+            if (defaultXlsx)
+            {
+                fileContent += GetSheetInfo(mMain, workbook, "駅名", "STCnt:", false);
+                fileContent += GetSheetInfo(mMain, workbook, "コミックスクリプト", "ComicScript:", false);
+                fileContent += GetSheetInfo(mMain, workbook, "モデル情報", "MdlCnt:", false);
+                fileContent += GetSheetInfo(mMain, workbook, "レール情報", "RailCnt:", true);
+                fileContent += GetSheetInfo(mMain, workbook, "AMB情報", "AmbCnt:", true);
+            }
+            else
+            {
+                fileContent += GetSheetInfo(mMain, workbook, "0番目", "STCnt:", false);
+                fileContent += GetSheetInfo(mMain, workbook, "0番目", "ComicScript:", false);
+                fileContent += GetSheetInfo(mMain, workbook, "0番目", "MdlCnt:", false);
+                fileContent += GetSheetInfo(mMain, workbook, "0番目", "RailCnt:", true);
+                fileContent += GetSheetInfo(mMain, workbook, "0番目", "AmbCnt:", true);
+            }
             mMain.SetPanelText("");
             yield return null;
             StagedataRead(mMain, fileContent, railFlag, ambFlag);
@@ -92,7 +121,15 @@ namespace FileReadMgrClass
 
         public string GetSheetInfo(Main mMain, Workbook workbook, string sheetName, string searchString, bool indexFlag)
         {
-            Worksheet worksheet = workbook.Worksheets[sheetName];
+            Worksheet worksheet;
+            if (sheetName.Equals("0番目"))
+            {
+                worksheet = workbook.Worksheets[0];
+            }
+            else
+            {
+                worksheet = workbook.Worksheets[sheetName];
+            }
             if (worksheet == null)
             {
                 mMain.DebugError(sheetName + "シートなし！");
@@ -116,7 +153,7 @@ namespace FileReadMgrClass
                     }
                     break;
                 }
-                if (indexFlag)
+                if (index != -1 && indexFlag)
                 {
                     if ("index".Equals(dt.Rows[i][0]))
                     {
@@ -149,9 +186,9 @@ namespace FileReadMgrClass
 
             if (indexFlag)
             {
-                if (index2 == -1)
+                if (index2 == -1 && cnt != 0)
                 {
-                    mMain.DebugError(sheetName + "シートの、データ位置を探せません");
+                    mMain.DebugError(sheetName + "シートの" + searchString + "データ位置を探せません");
                     return null;
                 }
                 else
@@ -165,7 +202,7 @@ namespace FileReadMgrClass
             }
             sb.Append("\n");
 
-            if (searchString.Equals("AmbCnt:"))
+            if (searchString.Equals("AmbCnt:") && cnt != 0)
             {
                 if (System.DBNull.Value.Equals(dt.Rows[index2 + cnt][0]))
                 {
