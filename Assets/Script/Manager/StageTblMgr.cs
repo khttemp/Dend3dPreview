@@ -70,9 +70,9 @@ namespace StageTblMgrClass
             }
 
             // STCnt
-            string[] array14 = ReadTbl(array[num10]);
             try
             {
+                string[] array14 = ReadTbl(array[num10]);
                 int stationCnt = int.Parse(array14[1]);
                 this.StList = new st_list[stationCnt];
                 for (int num39 = 0; num39 < stationCnt; num39++)
@@ -109,9 +109,9 @@ namespace StageTblMgrClass
             }
 
             // ComicScript
-            string[] array16 = ReadTbl(array[num12]);
             try
             {
+                string[] array16 = ReadTbl(array[num12]);
                 int num35 = int.Parse(array16[1]);
                 this.EventList = new event_list[num35];
                 for (int num56 = 0; num56 < num35; num56++)
@@ -133,9 +133,9 @@ namespace StageTblMgrClass
             }
 
             // MdlList
-            string[] array19 = ReadTbl(array[num15]);
             try
             {
+                string[] array19 = ReadTbl(array[num15]);
                 int num27 = int.Parse(array19[1]);
                 this.MdlList = new mdl_list[num27];
                 for (int num58 = 0; num58 < num27; num58++)
@@ -163,9 +163,9 @@ namespace StageTblMgrClass
             }
 
             // RailList
-            string[] array20 = ReadTbl(array[num16]);
             try
             {
+                string[] array20 = ReadTbl(array[num16]);
                 int num28 = int.Parse(array20[1]);
                 this.RailList = new rail_list[num28];
                 for (int num62 = 0; num62 < num28; num62++)
@@ -241,9 +241,9 @@ namespace StageTblMgrClass
             }
 
             // AmbList
-            string[] array24 = ReadTbl(array[num20]);
             try
             {
+                string[] array24 = ReadTbl(array[num20]);
                 int num32 = int.Parse(array24[1]);
                 int num33 = 0;
                 if (array24.Length >= 3)
