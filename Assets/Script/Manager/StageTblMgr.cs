@@ -70,6 +70,7 @@ namespace StageTblMgrClass
             }
 
             // STCnt
+            string[] array31 = null;
             try
             {
                 string[] array14 = ReadTbl(array[num10]);
@@ -79,7 +80,7 @@ namespace StageTblMgrClass
                 {
                     int num40 = 1;
                     this.StList[num39] = new st_list();
-                    string[] array31 = ReadTbl(array[num10 + 1 + num39]);
+                    array31 = ReadTbl(array[num10 + 1 + num39]);
                     this.StList[num39].Index = int.Parse(array31[num40++]);
                     this.StList[num39].Rail = int.Parse(array31[num40++]);
                     this.StList[num39].Offset = float.Parse(array31[num40++]);
@@ -104,11 +105,16 @@ namespace StageTblMgrClass
             catch (System.Exception ex2)
             {
                 mMain.DebugError("STCnt読込エラー");
+                if (array31 != null)
+                {
+                    mMain.DebugError(string.Join(", ", array31));
+                }
                 mMain.DebugError(ex2.ToString());
                 return false;
             }
 
             // ComicScript
+            string[] array37 = null;
             try
             {
                 string[] array16 = ReadTbl(array[num12]);
@@ -118,7 +124,7 @@ namespace StageTblMgrClass
                 {
                     int num57 = 1;
                     this.EventList[num56] = new event_list();
-                    string[] array37 = ReadTbl(array[num12 + 1 + num56]);
+                    array37 = ReadTbl(array[num12 + 1 + num56]);
                     this.EventList[num56].event_no = int.Parse(array37[num57++]);
                     this.EventList[num56].event_type = int.Parse(array37[num57++]);
                     this.EventList[num56].rail_no = int.Parse(array37[num57++]);
@@ -128,11 +134,16 @@ namespace StageTblMgrClass
             catch (System.Exception ex2)
             {
                 mMain.DebugError("ComicScript読込エラー");
+                if (array37 != null)
+                {
+                    mMain.DebugError(string.Join(", ", array37));
+                }
                 mMain.DebugError(ex2.ToString());
                 return false;
             }
 
             // MdlList
+            string[] array38 = null;
             try
             {
                 string[] array19 = ReadTbl(array[num15]);
@@ -142,7 +153,7 @@ namespace StageTblMgrClass
                 {
                     int num59 = 1;
                     this.MdlList[num58] = new mdl_list();
-                    string[] array38 = ReadTbl(array[num15 + 1 + num58]);
+                    array38 = ReadTbl(array[num15 + 1 + num58]);
                     if (array38.Length == 0)
                     {
                         mMain.DebugError("空のデータ！レール設定番号(" + num27 + ")　実データ(" + num58 + ")");
@@ -158,11 +169,16 @@ namespace StageTblMgrClass
             catch (System.Exception ex2)
             {
                 mMain.DebugError("MdlCnt読込エラー");
+                if (array38 != null)
+                {
+                    mMain.DebugError(string.Join(", ", array38));
+                }
                 mMain.DebugError(ex2.ToString());
                 return false;
             }
 
             // RailList
+            string[] array39 = null;
             try
             {
                 string[] array20 = ReadTbl(array[num16]);
@@ -172,7 +188,7 @@ namespace StageTblMgrClass
                 {
                     int num63 = 1;
                     this.RailList[num62] = new rail_list();
-                    string[] array39 = ReadTbl(array[num16 + 1 + num62]);
+                    array39 = ReadTbl(array[num16 + 1 + num62]);
                     if (array39.Length == 0)
                     {
                         mMain.DebugError("空のデータ！レール設定番号(" + num28 + ")　実データ(" + num62 + ")");
@@ -236,11 +252,16 @@ namespace StageTblMgrClass
             catch (System.Exception ex2)
             {
                 mMain.DebugError("RailCnt読込エラー");
+                if (array39 != null)
+                {
+                    mMain.DebugError(string.Join(", ", array39));
+                }
                 mMain.DebugError(ex2.ToString());
                 return false;
             }
 
             // AmbList
+            string[] array43 = null;
             try
             {
                 string[] array24 = ReadTbl(array[num20]);
@@ -254,7 +275,6 @@ namespace StageTblMgrClass
                 for (int num74 = 0; num74 < num32; num74++)
                 {
                     int num75 = 1;
-                    string[] array43 = null;
                     try
                     {
                         if (num20 + 1 + num74 >= array.Length)
@@ -320,6 +340,10 @@ namespace StageTblMgrClass
             catch (System.Exception ex2)
             {
                 mMain.DebugError("AmbCnt読込エラー");
+                if (array43 != null)
+                {
+                    mMain.DebugError(string.Join(", ", array43));
+                }
                 mMain.DebugError(ex2.ToString());
                 return false;
             }
