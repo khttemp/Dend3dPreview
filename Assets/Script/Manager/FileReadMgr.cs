@@ -156,7 +156,7 @@ namespace FileReadMgrClass
             bool isNewLineFlag = false;
             for (int i = 0; i < rowNum; i++)
             {
-                if (index == -1 && searchString.Equals(dt.Rows[i][0]))
+                if (index == -1 && searchString.Equals(dt.Rows[i][0].ToString()))
                 {
                     index = i;
                     if (indexFlag)
@@ -167,12 +167,12 @@ namespace FileReadMgrClass
                 }
                 if (index != -1 && indexFlag)
                 {
-                    if ("index".Equals(dt.Rows[i][0]))
+                    if ("index".Equals(dt.Rows[i][0].ToString()))
                     {
                         index2 = i;
                         break;
                     }
-                    else if ("0".Equals(dt.Rows[i][0]))
+                    else if ("0".Equals(dt.Rows[i][0].ToString()))
                     {
                         index2 = i - 1;
                         break;
