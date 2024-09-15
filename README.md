@@ -48,7 +48,7 @@
   
   レール番号検索で見つけた場合、探したレールにアウトラインを付ける
 
-* Aspose.Cells for .NET
+* ExcelDataReader
 
   エクセルでステージデータを読込ませるため
 

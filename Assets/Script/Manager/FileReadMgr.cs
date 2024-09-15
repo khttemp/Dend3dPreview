@@ -5,10 +5,9 @@ using UnityEngine;
 using System.IO;
 using System.Data;
 using System.Text;
-using Aspose.Cells;
+using ExcelDataReader;
 
 using MainClass;
-using JointMdlClass;
 
 namespace FileReadMgrClass
 {
@@ -87,56 +86,69 @@ namespace FileReadMgrClass
             yield return null;
             List<string> sheetKeyList = new List<string>(sheetMap.Keys);
             bool defaultXlsx = true;
-            Workbook workbook = new Workbook(filePath);
-            mdlMap = new Dictionary<string, string>();
-            for (int i = 0; i < sheetKeyList.Count; i++)
+            using (var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                if (!workbook.Worksheets.Exists(x => x.Name.Equals(sheetKeyList[i])))
+                using (var reader = ExcelReaderFactory.CreateReader(fileStream))
                 {
-                    defaultXlsx = false;
-                    break;
+                    DataSet dataSetResult = reader.AsDataSet();
+
+                    mdlMap = new Dictionary<string, string>();
+                    List<string> sheetNameList = new List<string>();
+                    for (int i = 0; i < dataSetResult.Tables.Count; i++)
+                    {
+                        sheetNameList.Add(dataSetResult.Tables[i].TableName);
+                    }
+                    for (int i = 0; i < sheetKeyList.Count; i++)
+                    {
+                        if (!sheetNameList.Exists(x => x.Equals(sheetKeyList[i])))
+                        {
+                            defaultXlsx = false;
+                            break;
+                        }
+                    }
+
+                    string fileContent = string.Empty;
+                    if (defaultXlsx)
+                    {
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "駅名", "STCnt:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "コミックスクリプト", "ComicScript:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "モデル情報", "MdlCnt:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "レール情報", "RailCnt:", true);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "AMB情報", "AmbCnt:", true);
+                    }
+                    else
+                    {
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "STCnt:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "ComicScript:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "MdlCnt:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "RailCnt:", true);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "AmbCnt:", true);
+                    }
+
+                    mMain.SetPanelText("");
+                    yield return null;
+                    StagedataRead(mMain, fileContent, railFlag, ambFlag);
                 }
             }
-            string fileContent = string.Empty;
-            if (defaultXlsx)
-            {
-                fileContent += GetSheetInfo(mMain, workbook, "駅名", "STCnt:", false);
-                fileContent += GetSheetInfo(mMain, workbook, "コミックスクリプト", "ComicScript:", false);
-                fileContent += GetSheetInfo(mMain, workbook, "モデル情報", "MdlCnt:", false);
-                fileContent += GetSheetInfo(mMain, workbook, "レール情報", "RailCnt:", true);
-                fileContent += GetSheetInfo(mMain, workbook, "AMB情報", "AmbCnt:", true);
-            }
-            else
-            {
-                fileContent += GetSheetInfo(mMain, workbook, "0番目", "STCnt:", false);
-                fileContent += GetSheetInfo(mMain, workbook, "0番目", "ComicScript:", false);
-                fileContent += GetSheetInfo(mMain, workbook, "0番目", "MdlCnt:", false);
-                fileContent += GetSheetInfo(mMain, workbook, "0番目", "RailCnt:", true);
-                fileContent += GetSheetInfo(mMain, workbook, "0番目", "AmbCnt:", true);
-            }
-            mMain.SetPanelText("");
-            yield return null;
-            StagedataRead(mMain, fileContent, railFlag, ambFlag);
         }
 
-        public string GetSheetInfo(Main mMain, Workbook workbook, string sheetName, string searchString, bool indexFlag)
+        public string GetSheetInfo(Main mMain, DataSet ds, string sheetName, string searchString, bool indexFlag)
         {
-            Worksheet worksheet;
+            DataTable dt;
             if (sheetName.Equals("0番目"))
             {
-                worksheet = workbook.Worksheets[0];
+                dt = ds.Tables[0];
             }
             else
             {
-                worksheet = workbook.Worksheets[sheetName];
+                dt = ds.Tables[sheetName];
             }
-            if (worksheet == null)
+            if (dt == null)
             {
                 mMain.DebugError(sheetName + "シートなし！");
                 return null;
             }
             StringBuilder sb = new StringBuilder();
-            DataTable dt = worksheet.Cells.ExportDataTableAsString(0, 0, worksheet.Cells.MaxDataRow + 1, worksheet.Cells.MaxDataColumn + 1, false);
             int index = -1;
             int index2 = -1;
             int cnt = -1;
@@ -176,7 +188,7 @@ namespace FileReadMgrClass
             {
                 sb.Append(dt.Rows[index][0]);
                 sb.Append("\t");
-                if (!int.TryParse((string) dt.Rows[index][1], out cnt))
+                if (!int.TryParse(dt.Rows[index][1].ToString(), out cnt))
                 {
                     mMain.DebugError(sheetName + "シートの数が不正(" + dt.Rows[index][1] + ")");
                     return null;
@@ -211,7 +223,7 @@ namespace FileReadMgrClass
                 else
                 {
                     int val = -1;
-                    if (int.TryParse((string)dt.Rows[index2 + cnt][0], out val))
+                    if (int.TryParse(dt.Rows[index2 + cnt][0].ToString(), out val))
                     {
                         if (cnt != val + 1)
                         {
@@ -251,7 +263,7 @@ namespace FileReadMgrClass
                                 sb.Append("\n");
                                 break;
                             }
-                            string s = (string) dt.Rows[index2 + 1 + i][j];
+                            string s = dt.Rows[index2 + 1 + i][j].ToString();
                             // ambData
                             if (j == 3)
                             {
@@ -290,7 +302,7 @@ namespace FileReadMgrClass
                                 sb.Append("\n");
                                 break;
                             }
-                            string s = (string) dt.Rows[index2 + 1 + i][j];
+                            string s = dt.Rows[index2 + 1 + i][j].ToString();
                             // mdl_no
                             if (j == 4)
                             {
@@ -341,7 +353,7 @@ namespace FileReadMgrClass
                             sb.Append("\n");
                             break;
                         }
-                        string s = (string) dt.Rows[idx][j];
+                        string s = dt.Rows[idx][j].ToString();
 
                         if (searchString.Equals("MdlCnt:"))
                         {
