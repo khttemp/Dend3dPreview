@@ -331,6 +331,11 @@ namespace FileReadMgrClass
                         {
                             idx = index2 + 1 + i;
                         }
+                        if (idx >= dt.Rows.Count)
+                        {
+                            mMain.DebugError("入力した" + searchString + "の数字は、データの行範囲(" + dt.Rows.Count + ")を超えます");
+                            return null;
+                        }
                         if (System.DBNull.Value.Equals(dt.Rows[idx][j]))
                         {
                             sb.Append("\n");

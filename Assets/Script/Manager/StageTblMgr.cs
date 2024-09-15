@@ -107,7 +107,7 @@ namespace StageTblMgrClass
                 mMain.DebugError("STCnt読込エラー");
                 if (array31 != null)
                 {
-                    mMain.DebugError(string.Join(", ", array31));
+                    mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array31) + "]");
                 }
                 mMain.DebugError(ex2.ToString());
                 return false;
@@ -136,7 +136,7 @@ namespace StageTblMgrClass
                 mMain.DebugError("ComicScript読込エラー");
                 if (array37 != null)
                 {
-                    mMain.DebugError(string.Join(", ", array37));
+                    mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array37) + "]");
                 }
                 mMain.DebugError(ex2.ToString());
                 return false;
@@ -171,7 +171,7 @@ namespace StageTblMgrClass
                 mMain.DebugError("MdlCnt読込エラー");
                 if (array38 != null)
                 {
-                    mMain.DebugError(string.Join(", ", array38));
+                    mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array38) + "]");
                 }
                 mMain.DebugError(ex2.ToString());
                 return false;
@@ -254,7 +254,7 @@ namespace StageTblMgrClass
                 mMain.DebugError("RailCnt読込エラー");
                 if (array39 != null)
                 {
-                    mMain.DebugError(string.Join(", ", array39));
+                    mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array39) + "]");
                 }
                 mMain.DebugError(ex2.ToString());
                 return false;
@@ -342,7 +342,7 @@ namespace StageTblMgrClass
                 mMain.DebugError("AmbCnt読込エラー");
                 if (array43 != null)
                 {
-                    mMain.DebugError(string.Join(", ", array43));
+                    mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array43) + "]");
                 }
                 mMain.DebugError(ex2.ToString());
                 return false;
