@@ -12,6 +12,7 @@ using CameraMgrClass;
 using StageTblMgrClass;
 using RailMgrClass;
 using AMBMgrClass;
+using RSRailMgrClass;
 
 namespace MainClass
 {
@@ -20,7 +21,9 @@ namespace MainClass
         public StageTblMgr mStageTblMgr = new StageTblMgr();
         public RailMgr mRailMgr;
         public AMBMgr mAMBMgr = new AMBMgr();
+        public RSRailMgr mRSRailMgr;
         public string defaultPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
+        public int defaultOfdIndex = 1;
 
         Transform CanvasTr;
         CameraMgr mCameraMgr;
@@ -43,6 +46,7 @@ namespace MainClass
         public void Start()
         {
             mRailMgr = GameObject.Find("RailMgr").GetComponent<RailMgr>();
+            mRSRailMgr = GameObject.Find("RSRailMgr").GetComponent<RSRailMgr>();
             mCameraMgr = FindCameraMgrClass();
 
             CanvasTr = GameObject.Find("Canvas").transform;
@@ -130,6 +134,21 @@ namespace MainClass
                 mCameraMgr.mainCamObj.transform.rotation = Quaternion.Euler(initRotVector);
             }
             mCameraMgr.moveFlag = true;
+        }
+
+        public void SetRSDrawModel()
+        {
+            StartCoroutine(_SetRSDrawModel());
+        }
+
+        public IEnumerator _SetRSDrawModel()
+        {
+            SetPanelText("レール\n読み込み中...");
+            yield return null;
+            mRSRailMgr.search_rail_index = -1;
+            mRSRailMgr.SetRailData(this);
+            SetPanelText("");
+            yield return null;
         }
 
         public void DebugError(string message)

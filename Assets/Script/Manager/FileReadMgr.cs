@@ -8,6 +8,7 @@ using System.Text;
 using ExcelDataReader;
 
 using MainClass;
+using RSDecryptClass;
 
 namespace FileReadMgrClass
 {
@@ -23,38 +24,79 @@ namespace FileReadMgrClass
             {"AMB情報", "AmbCnt:"}
         };
 
+        Dictionary<string, string> rsSheetMap = new Dictionary<string, string>()
+        {
+            {"BGM、配置情報", ""},
+            {"駅名位置情報", "STCnt"},
+            {"Comic Script、土讃線", "ComicScript"},
+            {"smf情報", "MdlCnt"},
+            {"レール情報", "RailCnt"},
+            {"要素4", "else4"}
+        };
+
         public void Read(Main mMain, bool railFlag, bool ambFlag)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = mMain.defaultPath;
+            ofd.FilterIndex = mMain.defaultOfdIndex;
             ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx";
+            //ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx|RS stagedata (RAIL*.BIN, *.xlsx)|*.BIN;*.xlsx";
             
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 string filePath = ofd.FileName;
-                string fileExt = Path.GetExtension(filePath);
+                string fileExt = Path.GetExtension(filePath).ToLower();
                 mMain.defaultPath = Path.GetDirectoryName(filePath);
+                mMain.defaultOfdIndex = ofd.FilterIndex;
                 string fileContent = string.Empty;
-                if (".txt".Equals(fileExt))
+                if (ofd.FilterIndex == 1)
                 {
-                    var fileStream = ofd.OpenFile();
-                    using (StreamReader reader = new StreamReader(fileStream))
+                    if (".txt".Equals(fileExt))
                     {
-                        fileContent = reader.ReadToEnd();
+                        var fileStream = ofd.OpenFile();
+                        using (StreamReader reader = new StreamReader(fileStream))
+                        {
+                            fileContent = reader.ReadToEnd();
+                        }
+                        StagedataRead(mMain, fileContent, railFlag, ambFlag);
                     }
-                    StagedataRead(mMain, fileContent, railFlag, ambFlag);
+                    else if (".xlsx".Equals(fileExt))
+                    {
+                        try
+                        {
+                            xlsxRead(mMain, filePath, railFlag, ambFlag);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            MessageBox.Show("予想外のエラー", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            mMain.DebugError(ex.ToString());
+                            mMain.SetPanelText("");
+                        }
+                    }
                 }
-                else if (".xlsx".Equals(fileExt))
+                else if (ofd.FilterIndex == 2)
                 {
-                    try
+                    if (".bin".Equals(fileExt))
                     {
-                        xlsxRead(mMain, filePath, railFlag, ambFlag);
+                        if (!mMain.mRSRailMgr.mRSDecryptMgr.Decrypt(filePath, mMain))
+                        {
+                            MessageBox.Show("レールデータ読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        RSStagedataRead(mMain);
                     }
-                    catch (System.Exception ex)
+                    else if (".xlsx".Equals(fileExt))
                     {
-                        MessageBox.Show("予想外のエラー", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        mMain.DebugError(ex.ToString());
-                        mMain.SetPanelText("");
+                        try
+                        {
+                            rsXlsxRead(mMain, filePath, railFlag, ambFlag);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            MessageBox.Show("予想外のエラー", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            mMain.DebugError(ex.ToString());
+                            mMain.SetPanelText("");
+                        }
                     }
                 }
             }
@@ -364,6 +406,13 @@ namespace FileReadMgrClass
                                     mdlMap.Add(s, i.ToString());
                                 }
                             }
+                            else if (j == 2 || j == 3)
+                            {
+                                if (s.Contains("0x"))
+                                {
+                                    s = s.Substring(2);
+                                }
+                            }
                         }
                         else if (searchString.Equals("RailCnt:"))
                         {
@@ -373,6 +422,13 @@ namespace FileReadMgrClass
                                 if (mdlMap.ContainsKey(s))
                                 {
                                     s = mdlMap[s];
+                                }
+                            }
+                            else if (j >= 12 && j <= 15)
+                            {
+                                if (s.Contains("0x"))
+                                {
+                                    s = s.Substring(2);
                                 }
                             }
                         }
@@ -402,6 +458,106 @@ namespace FileReadMgrClass
             }
             sb.Append("\n");
             return sb.ToString();
+        }
+
+        public void rsXlsxRead(Main mMain, string filePath, bool railFlag, bool ambFlag)
+        {
+            mMain.StartCoroutine(_rsXlsxRead(mMain, filePath, railFlag, ambFlag));
+        }
+
+        public IEnumerator _rsXlsxRead(Main mMain, string filePath, bool railFlag, bool ambFlag)
+        {
+            mMain.SetPanelText("RSのエクセルファイル\n読み込み中...");
+            yield return null;
+            List<string> sheetKeyList = new List<string>(rsSheetMap.Keys);
+            bool defaultXlsx = true;
+            using (var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(fileStream))
+                {
+                    DataSet dataSetResult = reader.AsDataSet();
+
+                    List<string> sheetNameList = new List<string>();
+                    for (int i = 0; i < dataSetResult.Tables.Count; i++)
+                    {
+                        sheetNameList.Add(dataSetResult.Tables[i].TableName);
+                    }
+                    for (int i = 0; i < sheetKeyList.Count; i++)
+                    {
+                        if (!sheetNameList.Exists(x => x.Equals(sheetKeyList[i])))
+                        {
+                            MessageBox.Show(sheetKeyList[i] + "シートなし", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            defaultXlsx = false;
+                            break;
+                        }
+                    }
+
+                    if (!defaultXlsx)
+                    {
+                        mMain.SetPanelText("");
+                        yield break;
+                    }
+
+                    DataTable dt = dataSetResult.Tables["BGM、配置情報"];
+                    string header = dt.Rows[0][0].ToString();
+                    if ("DEND_MAP_VER0400".Equals(header))
+                    {
+                        mMain.mRSRailMgr.mRSDecryptMgr.ouhukuFlag = true;
+                    }
+                    else if ("DEND_MAP_VER0300".Equals(header))
+                    {
+                        mMain.mRSRailMgr.mRSDecryptMgr.ouhukuFlag = false;
+                    }
+                    else
+                    {
+                        MessageBox.Show("シートのヘッダー情報不正", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.SetPanelText("");
+                        yield break;
+                    }
+
+                    mMain.mRSRailMgr.mRSDecryptMgr.rsMdlMap = new Dictionary<string, string>();
+                    mMain.mRSRailMgr.mRSDecryptMgr.Remove();
+                    if (!mMain.mRSRailMgr.mRSDecryptMgr.XlsxRead(mMain, dataSetResult, "駅名位置情報", "STCnt", false))
+                    {
+                        MessageBox.Show("エクセル読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.SetPanelText("");
+                        yield break;
+                    }
+                    if (!mMain.mRSRailMgr.mRSDecryptMgr.XlsxRead(mMain, dataSetResult, "Comic Script、土讃線", "ComicScript", false))
+                    {
+                        MessageBox.Show("エクセル読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.SetPanelText("");
+                        yield break;
+                    }
+                    if (!mMain.mRSRailMgr.mRSDecryptMgr.XlsxRead(mMain, dataSetResult, "smf情報", "MdlCnt", false))
+                    {
+                        MessageBox.Show("エクセル読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.SetPanelText("");
+                        yield break;
+                    }
+                    if (!mMain.mRSRailMgr.mRSDecryptMgr.XlsxRead(mMain, dataSetResult, "レール情報", "RailCnt", true))
+                    {
+                        MessageBox.Show("エクセル読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.SetPanelText("");
+                        yield break;
+                    }
+                    if (!mMain.mRSRailMgr.mRSDecryptMgr.XlsxRead(mMain, dataSetResult, "要素4", "else4", false))
+                    {
+                        MessageBox.Show("エクセル読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.SetPanelText("");
+                        yield break;
+                    }
+
+                    mMain.SetPanelText("");
+                    yield return null;
+                    RSStagedataRead(mMain);
+                }
+            }
+        }
+
+        public void RSStagedataRead(Main mMain)
+        {
+            mMain.SetRSDrawModel();
         }
     }
 }

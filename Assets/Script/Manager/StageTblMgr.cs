@@ -226,7 +226,7 @@ namespace StageTblMgrClass
                     int num64 = int.Parse(array39[num63++]);
                     if (num64 <= 0)
                     {
-                        mMain.DebugWarning("レールNo." + num62 + "のrail_dataが0以下：" + num62);
+                        mMain.DebugWarning("レールNo." + num62 + "のrail_dataが0以下：" + num64);
                     }
                     this.RailList[num62].r = new rail_data_list[num64];
                     try
