@@ -40,6 +40,23 @@
 
 初期値は「Dend3dPreview_Data/config.ini」で調整できます。
 
+## キーボード、マウスホイールのカスタム操作
+
+![config](config.png)
+
+「Dend3dPreview_Data/config.ini」で調整できる
+
+| 操作 | 説明 | デフォルトキー(値) |
+| --- | --- | --- |
+| FORWARD_KEY | カメラを前へ動かす | w |
+| BACKWARD_KEY | カメラを後ろへ動かす | s |
+| LEFT_KEY | カメラを左へ動かす | a |
+| RIGHT_KEY | カメラを右へ動かせる | d |
+| UP_KEY | カメラを上へ動かせる | q |
+| DOWN_KEY | カメラを下へ動かせる | e |
+| MOUSE_WHEEL_FLAG | マウスホイールの動き | 0（デフォルト）、1（逆転させる） |
+
+
 # Import package
 
 このツールは、下記のパッケージ・ライブラリを使っています

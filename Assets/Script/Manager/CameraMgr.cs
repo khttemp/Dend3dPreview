@@ -27,6 +27,8 @@ namespace CameraMgrClass
         int keyDownCnt;
         bool holdFlag;
 
+        string[] keyConfigList;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -40,6 +42,7 @@ namespace CameraMgrClass
             camFarInputField = CanvasTr.Find("FarInputField").GetComponent<InputField>();
             camFarInputField.onEndEdit.AddListener(UpdateCamFar);
 
+            keyConfigList = new string[] {"w", "s", "a", "d", "q", "e", "0"};
             iniFilePath = UnityEngine.Application.dataPath + "/" + "config.ini";
             OpenIniFile();
 
@@ -80,7 +83,14 @@ namespace CameraMgrClass
                 float scrollSensitiveZoom = GetCamMoveText();
                 float moveZ = Input.GetAxis("Mouse ScrollWheel") * scrollSensitiveZoom;
                 Vector3 moveForward = mainCamObj.transform.forward * moveZ;
-                mainCamObj.transform.localPosition -= moveForward;
+                if (keyConfigList[6].Equals("0"))
+                {
+                    mainCamObj.transform.localPosition -= moveForward;
+                }
+                else
+                {
+                    mainCamObj.transform.localPosition += moveForward;
+                }
             }
             if (!Input.GetMouseButton(0) && !Input.GetMouseButton(1))
             {
@@ -113,30 +123,35 @@ namespace CameraMgrClass
 
         void arrowMove()
         {
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.E))
+            if (Input.GetKey(keyConfigList[0]) ||
+                Input.GetKey(keyConfigList[1]) ||
+                Input.GetKey(keyConfigList[2]) ||
+                Input.GetKey(keyConfigList[3]) ||
+                Input.GetKey(keyConfigList[4]) ||
+                Input.GetKey(keyConfigList[5]))
             {
                 float distance = GetCamMoveText();
-                if (Input.GetKey(KeyCode.A))
+                if (Input.GetKey(keyConfigList[2]))
                 {
                     mainCamObj.transform.position -= mainCamObj.transform.right * distance;
                 }
-                if (Input.GetKey(KeyCode.D))
+                if (Input.GetKey(keyConfigList[3]))
                 {
                     mainCamObj.transform.position += mainCamObj.transform.right * distance;
                 }
-                if (Input.GetKey(KeyCode.W))
+                if (Input.GetKey(keyConfigList[0]))
                 {
                     mainCamObj.transform.position += mainCamObj.transform.forward * distance;
                 }
-                if (Input.GetKey(KeyCode.S))
+                if (Input.GetKey(keyConfigList[1]))
                 {
                     mainCamObj.transform.position -= mainCamObj.transform.forward * distance;
                 }
-                if (Input.GetKey(KeyCode.Q))
+                if (Input.GetKey(keyConfigList[4]))
                 {
                     mainCamObj.transform.position += mainCamObj.transform.up * distance;
                 }
-                if (Input.GetKey(KeyCode.E))
+                if (Input.GetKey(keyConfigList[5]))
                 {
                     mainCamObj.transform.position -= mainCamObj.transform.up * distance;
                 }
@@ -182,6 +197,13 @@ namespace CameraMgrClass
                 "MOVE",
                 "ROT",
                 "FAR",
+                "FORWARD_KEY",
+                "BACKWARD_KEY",
+                "LEFT_KEY",
+                "RIGHT_KEY",
+                "UP_KEY",
+                "DOWN_KEY",
+                "MOUSE_WHEEL_FLAG",
                 "ALL_DEBUG",
                 "DEBUG"
             };
@@ -190,6 +212,13 @@ namespace CameraMgrClass
                 {"MOVE", "0.01"},
                 {"ROT", "3.0"},
                 {"FAR", "1000.0"},
+                {"FORWARD_KEY", keyConfigList[0]},
+                {"BACKWARD_KEY", keyConfigList[1]},
+                {"LEFT_KEY", keyConfigList[2]},
+                {"RIGHT_KEY", keyConfigList[3]},
+                {"UP_KEY", keyConfigList[4]},
+                {"DOWN_KEY", keyConfigList[5]},
+                {"MOUSE_WHEEL_FLAG", keyConfigList[6]},
                 {"ALL_DEBUG", "0"},
                 {"DEBUG", "0"}
             };
@@ -217,6 +246,13 @@ namespace CameraMgrClass
             bool farFindFlag = false;
             bool allDebugFlag = false;
             bool debugFlag = false;
+            bool forwardFindFlag = false;
+            bool backwardFindFlag = false;
+            bool leftFindFlag = false;
+            bool rightFindFlag = false;
+            bool upFindFlag = false;
+            bool downFindFlag = false;
+            bool mouseWheelFindFlag = false;
             for (int i = 0; i < array.Length; i++)
             {
                 if (array[i].Contains("="))
@@ -242,6 +278,89 @@ namespace CameraMgrClass
                         {
                             farFindFlag = true;
                             ChangeCamFarText(collection[1]);
+                        }
+                        else if (collection[0].Equals("FORWARD_KEY"))
+                        {
+                            forwardFindFlag = true;
+                            try
+                            {
+                                Input.GetKey(collection[1]);
+                                keyConfigList[0] = collection[1];
+                            }
+                            catch (System.Exception)
+                            {
+                                mMain.DebugError("認識できないキー(" + collection[1] + ")です。" + collection[0] + "をデフォルトキーに設定します");
+                            }
+                        }
+                        else if (collection[0].Equals("BACKWARD_KEY"))
+                        {
+                            backwardFindFlag = true;
+                            try
+                            {
+                                Input.GetKey(collection[1]);
+                                keyConfigList[1] = collection[1];
+                            }
+                            catch (System.Exception)
+                            {
+                                mMain.DebugError("認識できないキー(" + collection[1] + ")です。" + collection[0] + "をデフォルトキーに設定します");
+                            }
+                        }
+                        else if (collection[0].Equals("LEFT_KEY"))
+                        {
+                            leftFindFlag = true;
+                            try
+                            {
+                                Input.GetKey(collection[1]);
+                                keyConfigList[2] = collection[1];
+                            }
+                            catch (System.Exception)
+                            {
+                                mMain.DebugError("認識できないキー(" + collection[1] + ")です。" + collection[0] + "をデフォルトキーに設定します");
+                            }
+                        }
+                        else if (collection[0].Equals("RIGHT_KEY"))
+                        {
+                            rightFindFlag = true;
+                            try
+                            {
+                                Input.GetKey(collection[1]);
+                                keyConfigList[3] = collection[1];
+                            }
+                            catch (System.Exception)
+                            {
+                                mMain.DebugError("認識できないキー(" + collection[1] + ")です。" + collection[0] + "をデフォルトキーに設定します");
+                            }
+                        }
+                        else if (collection[0].Equals("UP_KEY"))
+                        {
+                            upFindFlag = true;
+                            try
+                            {
+                                Input.GetKey(collection[1]);
+                                keyConfigList[4] = collection[1];
+                            }
+                            catch (System.Exception)
+                            {
+                                mMain.DebugError("認識できないキー(" + collection[1] + ")です。" + collection[0] + "をデフォルトキーに設定します");
+                            }
+                        }
+                        else if (collection[0].Equals("DOWN_KEY"))
+                        {
+                            downFindFlag = true;
+                            try
+                            {
+                                Input.GetKey(collection[1]);
+                                keyConfigList[5] = collection[1];
+                            }
+                            catch (System.Exception)
+                            {
+                                mMain.DebugError("認識できないキー(" + collection[1] + ")です。" + collection[0] + "をデフォルトキーに設定します");
+                            }
+                        }
+                        else if (collection[0].Equals("MOUSE_WHEEL_FLAG"))
+                        {
+                            mouseWheelFindFlag = true;
+                            keyConfigList[6] = collection[1];
                         }
                         else if (collection[0].Equals("ALL_DEBUG"))
                         {
@@ -271,6 +390,34 @@ namespace CameraMgrClass
             {
                 WriteIniFile(fi, "FAR", dict["FAR"]);
                 ChangeCamFarText(dict["FAR"]);
+            }
+            if (!forwardFindFlag)
+            {
+                WriteIniFile(fi, "FORWARD_KEY", dict["FORWARD_KEY"]);
+            }
+            if (!backwardFindFlag)
+            {
+                WriteIniFile(fi, "BACKWARD_KEY", dict["BACKWARD_KEY"]);
+            }
+            if (!leftFindFlag)
+            {
+                WriteIniFile(fi, "LEFT_KEY", dict["LEFT_KEY"]);
+            }
+            if (!rightFindFlag)
+            {
+                WriteIniFile(fi, "RIGHT_KEY", dict["RIGHT_KEY"]);
+            }
+            if (!upFindFlag)
+            {
+                WriteIniFile(fi, "UP_KEY", dict["UP_KEY"]);
+            }
+            if (!downFindFlag)
+            {
+                WriteIniFile(fi, "DOWN_KEY", dict["DOWN_KEY"]);
+            }
+            if (!mouseWheelFindFlag)
+            {
+                WriteIniFile(fi, "MOUSE_WHEEL_FLAG", dict["MOUSE_WHEEL_FLAG"]);
             }
             if (!allDebugFlag)
             {

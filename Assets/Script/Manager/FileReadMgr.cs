@@ -39,8 +39,8 @@ namespace FileReadMgrClass
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = mMain.defaultPath;
             ofd.FilterIndex = mMain.defaultOfdIndex;
-            ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx";
-            //ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx|RS stagedata (RAIL*.BIN, *.xlsx)|*.BIN;*.xlsx";
+            //ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx";
+            ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx|RS stagedata (RAIL*.BIN, *.xlsx)|*.BIN;*.xlsx";
             
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -410,7 +410,7 @@ namespace FileReadMgrClass
                             {
                                 if (s.Contains("0x"))
                                 {
-                                    s = s.Substring(2);
+                                    s = convertHexToNum(s);
                                 }
                             }
                         }
@@ -428,7 +428,7 @@ namespace FileReadMgrClass
                             {
                                 if (s.Contains("0x"))
                                 {
-                                    s = s.Substring(2);
+                                    s = convertHexToNum(s);
                                 }
                             }
                         }
@@ -458,6 +458,12 @@ namespace FileReadMgrClass
             }
             sb.Append("\n");
             return sb.ToString();
+        }
+
+        public string convertHexToNum(string s)
+        {
+            s = s.Substring(2);
+            return string.Format("{0}", uint.Parse(s, System.Globalization.NumberStyles.AllowHexSpecifier));
         }
 
         public void rsXlsxRead(Main mMain, string filePath, bool railFlag, bool ambFlag)
