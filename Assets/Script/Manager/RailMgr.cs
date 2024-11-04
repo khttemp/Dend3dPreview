@@ -426,6 +426,12 @@ namespace RailMgrClass
                         {
                             if (r.r[j].prev.rail >= 0)
                             {
+                                if (r.r[j].prev.rail >= mMain.mStageTblMgr.RailList.Length)
+                                {
+                                    mMain.DebugError("レールNo." + rail_index + "の、prevのレール指定が不正(" + r.r[j].prev.rail + ", " + r.r[j].prev.no + ")");
+                                    isError = true;
+                                    return;
+                                }
                                 if (r.r[j].prev.rail != rail_index)
                                 {
                                     RailLineChk(rail_index, j, 0, r.r[j].prev.rail, mMain);
@@ -465,8 +471,14 @@ namespace RailMgrClass
                     RailMdl railMdl = railObj.GetComponent<RailMdl>();
                     for (int j = 0; j < r.r.Length; j++)
                     {
-                        if (r.r[j].next.rail < 0 || r.r[j].next.no < 0 || r.r[j].next.rail >= mMain.mStageTblMgr.RailList.Length)
+                        if (r.r[j].next.rail < 0 || r.r[j].next.no < 0)
                         {
+                            continue;
+                        }
+                        if (r.r[j].next.rail >= mMain.mStageTblMgr.RailList.Length)
+                        {
+                            mMain.DebugError("レールNo." + i + "の次のレール指定が不正(" + r.r[j].next.rail + ", " + r.r[j].next.no + ")");
+                            isError = true;
                             continue;
                         }
                         bool result = RailLineChk(r.r[j].next.rail, j, r.r[j].next.no % 100, i, mMain, true);
