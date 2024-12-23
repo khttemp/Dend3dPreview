@@ -39,13 +39,16 @@ namespace FileReadMgrClass
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.InitialDirectory = mMain.defaultPath;
             ofd.FilterIndex = mMain.defaultOfdIndex;
-            //ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx";
-            ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx|RS stagedata (RAIL*.BIN, *.xlsx)|*.BIN;*.xlsx";
+            ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx";
+            //ofd.Filter =  "stagedata files (*.txt, *.xlsx)|*.txt;*.xlsx|RS stagedata (RAIL*.BIN, *.xlsx)|*.BIN;*.xlsx";
             
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 string filePath = ofd.FileName;
                 string fileExt = Path.GetExtension(filePath).ToLower();
+                mMain.openFilename = filePath;
+                mMain.railFlag = railFlag;
+                mMain.ambFlag = ambFlag;
                 mMain.defaultPath = Path.GetDirectoryName(filePath);
                 mMain.defaultOfdIndex = ofd.FilterIndex;
                 string fileContent = string.Empty;
@@ -108,11 +111,14 @@ namespace FileReadMgrClass
             if (!result)
             {
                 MessageBox.Show("読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                mMain.SetDeactiveButton();
             }
             else
             {
-                mMain.SetActiveButton();
+                mMain.SetActiveAmbReadButton();
+                mMain.SetHideEditRailButton();
+                mMain.SetHideEditAmbButton();
+                mMain.InitRailObjOutlineAndLabel();
+                mMain.InitAmbObjOutlineAndLabel();
                 mMain.SetDrawModel(railFlag, ambFlag);
             }
         }

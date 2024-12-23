@@ -10,7 +10,7 @@ using JointMdlClass;
 using CameraMgrClass;
 using GetObjectLabelClass;
 
-public class jumpRailData : MonoBehaviour
+public class jumpAmbData : MonoBehaviour
 {
     GameObject dialogObject = null;
     UnityButton button;
@@ -57,7 +57,7 @@ public class jumpRailData : MonoBehaviour
 
     void jumpRailDataFunc()
     {
-        string dialogPath = "dialogPrefab/inputDialogPanel";
+        string dialogPath = "dialogPrefab/inputAmbDialogPanel";
         try
         {
             dialogObject = (UnityEngine.Object.Instantiate(Resources.Load(dialogPath)) as GameObject);
@@ -71,6 +71,8 @@ public class jumpRailData : MonoBehaviour
 
             InputField inputField = Panel.transform.Find("InputField").GetComponent<InputField>();
             inputField.onEndEdit.AddListener(EnterPressed);
+            InputField inputField2 = Panel.transform.Find("InputField2").GetComponent<InputField>();
+            inputField2.onEndEdit.AddListener(EnterPressed);
 
             mCameraMgr.moveFlag = false;
             button.interactable = false;
@@ -95,30 +97,59 @@ public class jumpRailData : MonoBehaviour
     {
         Text errorText = Panel.transform.Find("ErrorText").GetComponent<Text>();
         InputField inputField = Panel.transform.Find("InputField").GetComponent<InputField>();
-        string value = inputField.transform.Find("Text").GetComponent<Text>().text;
+        InputField inputField2 = Panel.transform.Find("InputField2").GetComponent<InputField>();
+        string ambValue = inputField.transform.Find("Text").GetComponent<Text>().text;
+        string ambIndex = inputField2.transform.Find("Text").GetComponent<Text>().text;
         try
         {
-            if (!"".Equals(value))
+            if (!"".Equals(ambValue))
             {
+                if ("".Equals(ambIndex))
+                {
+                    errorText.text = "index番号を入力してください";
+                    return;
+                }
                 int intVal;
                 try
                 {
-                    intVal = int.Parse(value);
-                    if (intVal < 0 || intVal >= mMain.mRailMgr.railObjList.Count)
+                    intVal = int.Parse(ambValue);
+                    if (intVal < 0 || intVal >= mMain.mAMBMgr.ambObjList.Length)
                     {
-                        errorText.text = "存在しないレール番号(" + intVal + ")";
+                        errorText.text = "存在しないAMB番号(" + intVal + ")";
                         return;
                     }
-                    if ((mMain.mStageTblMgr.RailList[intVal].flg & (1U << 31)) > 0)
+                    if (mMain.mAMBMgr.ambObjList[intVal] == null)
                     {
-                        errorText.text = "無効レール番号(" + intVal + ")";
+                        errorText.text = "描画されてないAMB番号(" + intVal + ")";
                         return;
                     }
                     errorText.text = "";
                 }
                 catch (System.Exception)
                 {
-                    errorText.text = "数字で入力してください";
+                    errorText.text = "AMB番号を数字で入力してください";
+                    return;
+                }
+
+                int intIndex;
+                try
+                {
+                    intIndex = int.Parse(ambIndex);
+                    if (intIndex < 0)
+                    {
+                        errorText.text = "index番号は0以上です(" + intIndex + ")";
+                        return;
+                    }
+                    if (intIndex >= mMain.mAMBMgr.ambObjList[intVal].Count)
+                    {
+                        errorText.text = "描画されてないAMBモデル(" + intVal + ", " + intIndex + ")";
+                        return;
+                    }
+                    errorText.text = "";
+                }
+                catch (System.Exception)
+                {
+                    errorText.text = "AMBのindexを数字で入力してください";
                     return;
                 }
 
@@ -131,20 +162,20 @@ public class jumpRailData : MonoBehaviour
                 mCameraMgr.moveFlag = true;
                 button.interactable = true;
 
-                GameObject railObj = mMain.mRailMgr.railObjList[intVal];
-                JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
+                GameObject ambObj = mMain.mAMBMgr.ambObjList[intVal][intIndex];
+                JointMdl ambObjJointMdl = ambObj.GetComponent<JointMdl>();
 
                 Vector3 curPos;
                 Vector3 curRot;
-                if (railObjJointMdl.BaseJoint == null)
+                if (ambObjJointMdl.BaseJoint == null)
                 {
-                    curPos = railObjJointMdl.JointList[0].transform.position;
-                    curRot = railObjJointMdl.JointList[0].transform.eulerAngles;
+                    curPos = ambObjJointMdl.JointList[0].transform.position;
+                    curRot = ambObjJointMdl.JointList[0].transform.eulerAngles;
                 }
                 else
                 {
-                    curPos = railObjJointMdl.BaseJoint.transform.position;
-                    curRot = railObjJointMdl.BaseJoint.transform.eulerAngles;
+                    curPos = ambObjJointMdl.BaseJoint.transform.position;
+                    curRot = ambObjJointMdl.BaseJoint.transform.eulerAngles;
                 }
                 curRot.z = 0;
                 mCameraMgr.mainCamObj.transform.position = curPos;
@@ -153,9 +184,9 @@ public class jumpRailData : MonoBehaviour
                 mCameraMgr.mainCamObj.transform.position += mCameraMgr.mainCamObj.transform.up * 0.1f;
                 mCameraMgr.mainCamObj.transform.position -= mCameraMgr.mainCamObj.transform.forward * 0.4f;
 
-                mMain.InitAmbObjOutlineAndLabel();
                 mMain.InitRailObjOutlineAndLabel();
-                JointMdl jointMdl = railObj.GetComponent<JointMdl>();
+                mMain.InitAmbObjOutlineAndLabel();
+                JointMdl jointMdl = ambObj.GetComponent<JointMdl>();
                 Transform baseMdl = jointMdl.AllTransformChildren[1];
                 if (baseMdl.gameObject.GetComponent<Outline>() == null)
                 {
@@ -164,22 +195,23 @@ public class jumpRailData : MonoBehaviour
                     outline.OutlineColor = Color.yellow;
                     outline.OutlineWidth = 10f;
                 }
-                if (railObj.GetComponent<GetObjectLabel>() == null)
+                if (ambObj.GetComponent<GetObjectLabel>() == null)
                 {
-                    railObj.AddComponent<GetObjectLabel>();
+                    ambObj.AddComponent<GetObjectLabel>();
                 }
-                mMain.mRailMgr.search_rail_index = intVal;
+                mMain.mAMBMgr.search_amb_no = intVal;
+                mMain.mAMBMgr.search_amb_index = intIndex;
 
-                GameObject editAmbButtonObj = editAmbButton.gameObject;
-                editAmbButtonObj.SetActive(false);
                 GameObject editRailButtonObj = editRailButton.gameObject;
                 editRailButtonObj.SetActive(false);
+                GameObject editAmbButtonObj = editAmbButton.gameObject;
+                editAmbButtonObj.SetActive(false);
                 string fileExt = Path.GetExtension(mMain.openFilename).ToLower();
                 if (".txt".Equals(fileExt))
                 {
-                    editRailButtonObj.SetActive(true);
-                    Text editRailButtonText = editRailButton.transform.Find("Text").GetComponent<Text>();
-                    editRailButtonText.text = "レールNo." + intVal + " の修正";
+                    editAmbButtonObj.SetActive(true);
+                    Text editAmbButtonText = editAmbButton.transform.Find("Text").GetComponent<Text>();
+                    editAmbButtonText.text = "AMB No.[" + intVal + "-" + intIndex + "] の修正";
                 }
             }
         }

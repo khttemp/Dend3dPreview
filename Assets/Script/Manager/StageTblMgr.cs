@@ -21,6 +21,8 @@ namespace StageTblMgrClass
         public mdl_list[] MdlList;
         public rail_list[] RailList;
         public amb_list[] AmbList;
+        public int railStartIndex;
+        public int ambStartIndex;
 
         public void Remove()
         {
@@ -404,6 +406,136 @@ namespace StageTblMgrClass
         uint Flg(byte flg1, byte flg2, byte flg3, byte flg4)
         {
             return (uint)((int)flg1 + ((int)flg2 << 8) + ((int)flg3 << 16) + ((int)flg4 << 24));
+        }
+
+        public int getRailDataTxtIndex(int railIndex, string t, string[] originArray, Main mMain)
+        {
+            int originRailDataIndex = -1;
+            try
+            {
+                string[] separator = new string[]
+                {
+                    "\r",
+                    "\n"
+                };
+                string[] array = t.Split(separator, System.StringSplitOptions.RemoveEmptyEntries);
+                int railCntIndex = -1;
+                string railData = null;
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if (array[i].Contains("RailCnt:"))
+                    {
+                        railCntIndex = i;
+                        railData = array[i + 1 + railIndex];
+                        break;
+                    }
+                }
+                int originRailCntIndex = -1;
+                int originAmbCntIndex = -1;
+                for (int i = 0; i < originArray.Length; i++)
+                {
+                    if (originArray[i].Contains("RailCnt:"))
+                    {
+                        originRailCntIndex = i;
+                    }
+                    else if (originArray[i].Contains("AmbCnt:"))
+                    {
+                        originAmbCntIndex = i;
+                    }
+                    if (originRailCntIndex >= 0 && originAmbCntIndex >= 0)
+                    {
+                        break;
+                    }
+                }
+
+                if (railData == null)
+                {
+                    mMain.DebugError("レールNo." + railIndex + "のデータを探せません");
+                    return originRailDataIndex;
+                }
+
+                for (int i = originRailCntIndex + 1; i < originAmbCntIndex; i++)
+                {
+                    if (railData.Equals(originArray[i]))
+                    {
+                        originRailDataIndex = i;
+                        break;
+                    }
+                }
+
+                if (originRailDataIndex == -1)
+                {
+                    mMain.DebugError("レールNo." + railIndex + "のデータのindexを探せません");
+                }
+                return originRailDataIndex;
+            }
+            catch (System.Exception ex)
+            {
+                mMain.DebugError("予想外のエラー");
+                mMain.DebugError(ex.ToString());
+                return -1;
+            }
+        }
+
+        public int getAmbDataTxtIndex(int ambNo, string t, string[] originArray, Main mMain)
+        {
+            int originAmbDataIndex = -1;
+            try
+            {
+                string[] separator = new string[]
+                {
+                    "\r",
+                    "\n"
+                };
+                string[] array = t.Split(separator, System.StringSplitOptions.RemoveEmptyEntries);
+                int ambCntIndex = -1;
+                string ambData = null;
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if (array[i].Contains("AmbCnt:"))
+                    {
+                        ambCntIndex = i;
+                        ambData = array[i + 1 + ambNo];
+                        break;
+                    }
+                }
+                int originAmbCntIndex = -1;
+                for (int i = 0; i < originArray.Length; i++)
+                {
+                    if (originArray[i].Contains("AmbCnt:"))
+                    {
+                        originAmbCntIndex = i;
+                        break;
+                    }
+                }
+
+                if (ambData == null)
+                {
+                    mMain.DebugError("AMB No." + ambNo + "のデータを探せません");
+                    return originAmbDataIndex;
+                }
+
+                for (int i = originAmbCntIndex + 1; i < originArray.Length; i++)
+                {
+                    if (ambData.Equals(originArray[i]))
+                    {
+                        originAmbDataIndex = i;
+                        break;
+                    }
+                }
+
+                if (originAmbDataIndex == -1)
+                {
+                    mMain.DebugError("AMB No." + ambNo + "のデータのindexを探せません");
+                }
+                return originAmbDataIndex;
+            }
+            catch (System.Exception ex)
+            {
+                mMain.DebugError("予想外のエラー");
+                mMain.DebugError(ex.ToString());
+                return -1;
+            }
         }
     }
 }

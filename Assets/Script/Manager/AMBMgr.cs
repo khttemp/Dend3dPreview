@@ -24,6 +24,9 @@ namespace AMBMgrClass
         public Dictionary<string, int> kasen_model_dict;
         public List<string> kasenModelList;
         public bool isError = false;
+        public int drawAmbCount = 0;
+        public int search_amb_no = -1;
+        public int search_amb_index = -1;
 
         public AMBMgr()
         {
@@ -102,6 +105,7 @@ namespace AMBMgrClass
                 isError = true;
                 return;
             }
+            drawAmbCount++;
             ambObj.AddComponent<JointMdl>();
             JointMdl ambJointModel = ambObj.GetComponent<JointMdl>();
             ambJointModel.Name = ambObj.name;
@@ -261,6 +265,8 @@ namespace AMBMgrClass
                 }
             }
             ambObjList = null;
+            search_amb_no = -1;
+            search_amb_index = -1;
             System.GC.Collect();
         }
 
@@ -470,6 +476,7 @@ namespace AMBMgrClass
             try
             {
                 isError = false;
+                drawAmbCount = 0;
                 RemoveAMB();
                 ambObjList = new List<GameObject>[mMain.mStageTblMgr.AmbList.Length];
                 for (int i = 0; i < mMain.mStageTblMgr.AmbList.Length; i++)

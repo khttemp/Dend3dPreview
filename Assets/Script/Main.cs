@@ -12,6 +12,8 @@ using CameraMgrClass;
 using StageTblMgrClass;
 using RailMgrClass;
 using AMBMgrClass;
+using JointMdlClass;
+using GetObjectLabelClass;
 using RSRailMgrClass;
 
 namespace MainClass
@@ -23,12 +25,20 @@ namespace MainClass
         public AMBMgr mAMBMgr = new AMBMgr();
         public RSRailMgr mRSRailMgr;
         public string defaultPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
+        public string openFilename;
+        public bool editModeFlag;
+        public bool railFlag;
+        public bool ambFlag;
         public int defaultOfdIndex = 1;
 
         Transform CanvasTr;
+        Transform DefaultPanel;
         CameraMgr mCameraMgr;
         UnityButton openRailOnlyAmbButton;
         UnityButton jumpRailButton;
+        UnityButton jumpAmbButton;
+        UnityButton editRailButton;
+        UnityButton editAmbButton;
         Toggle cameraToggle;
 
         GameObject loadingPanel;
@@ -50,17 +60,22 @@ namespace MainClass
             mCameraMgr = FindCameraMgrClass();
 
             CanvasTr = GameObject.Find("Canvas").transform;
-            openRailOnlyAmbButton = CanvasTr.Find("openRailOnlyAmbButton").GetComponent<UnityButton>();
-            jumpRailButton = CanvasTr.Find("jumpRailButton").GetComponent<UnityButton>();
-            cameraToggle = CanvasTr.Find("cameraToggle").GetComponent<Toggle>();
+            DefaultPanel = CanvasTr.Find("DefaultPanel").transform;
+            openRailOnlyAmbButton = DefaultPanel.Find("openRailOnlyAmbButton").GetComponent<UnityButton>();
+            jumpRailButton = DefaultPanel.Find("jumpRailButton").GetComponent<UnityButton>();
+            jumpAmbButton = DefaultPanel.Find("jumpAmbButton").GetComponent<UnityButton>();
+            editModeFlag = true;
+            editRailButton = DefaultPanel.Find("editRailButton").GetComponent<UnityButton>();
+            editAmbButton = DefaultPanel.Find("editAmbButton").GetComponent<UnityButton>();
+            cameraToggle = DefaultPanel.Find("cameraToggle").GetComponent<Toggle>();
 
             string loadingPanelPath = "dialogPrefab/LoadingPanel";
             loadingPanel = (UnityEngine.Object.Instantiate(Resources.Load(loadingPanelPath)) as GameObject);
             loadingPanel.name = loadingPanel.name.Replace("(Clone)", "");
-            loadingPanel.transform.SetParent(CanvasTr, false);
+            loadingPanel.transform.SetParent(DefaultPanel, false);
             loadingText = loadingPanel.transform.Find("LoadingText").GetComponent<Text>();
 
-            SetDeactiveButton();
+            SetDeactiveAmbReadButton();
         }
 
         CameraMgr FindCameraMgrClass()
@@ -69,30 +84,121 @@ namespace MainClass
             return mainCamObj.GetComponent<CameraMgr>();
         }
 
-        public void SetActiveButton()
+        public void SetActiveAmbReadButton()
         {
             openRailOnlyAmbButton.interactable = true;
+        }
+
+        public void SetDeactiveAmbReadButton()
+        {
+            openRailOnlyAmbButton.interactable = false;
+        }
+
+        public void SetActiveJumpRailButton()
+        {
             jumpRailButton.interactable = true;
         }
 
-        public void SetDeactiveButton()
+        public void SetDeactiveJumpRailButton()
         {
-            openRailOnlyAmbButton.interactable = false;
             jumpRailButton.interactable = false;
         }
 
-        public void SetDrawModel(bool railFlag, bool ambFlag)
+        public void SetActiveJumpAmbButton()
         {
-            StartCoroutine(_SetDrawModel(railFlag, ambFlag));
+            jumpAmbButton.interactable = true;
         }
 
-        public IEnumerator _SetDrawModel(bool railFlag, bool ambFlag)
+        public void SetDeactiveJumpAmbButton()
+        {
+            jumpAmbButton.interactable = false;
+        }
+
+        public void SetShowEditRailButton()
+        {
+            editRailButton.gameObject.SetActive(true);
+        }
+
+        public void SetHideEditRailButton()
+        {
+            editRailButton.gameObject.SetActive(false);
+        }
+
+        public void SetShowEditAmbButton()
+        {
+            editAmbButton.gameObject.SetActive(true);
+        }
+
+        public void SetHideEditAmbButton()
+        {
+            editAmbButton.gameObject.SetActive(false);
+        }
+
+        public void InitRailObjOutlineAndLabel()
+        {
+            if (mRailMgr.search_rail_index != -1)
+            {
+                try
+                {
+                    GameObject delObj = mRailMgr.railObjList[mRailMgr.search_rail_index];
+                    JointMdl delJointMdl = delObj.GetComponent<JointMdl>();
+                    Transform delBaseMdl = delJointMdl.AllTransformChildren[1];
+                    if (delBaseMdl.gameObject.GetComponent<Outline>() != null)
+                    {
+                        GameObject.Destroy(delBaseMdl.gameObject.GetComponent<Outline>());
+                    }
+                    if (delObj.GetComponent<GetObjectLabel>() != null)
+                    {
+                        GameObject.Destroy(delObj.GetComponent<GetObjectLabel>());
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError(ex.ToString());
+                }
+                mRailMgr.search_rail_index = -1;
+            }
+        }
+
+        public void InitAmbObjOutlineAndLabel()
+        {
+            if (mAMBMgr.search_amb_no != -1 && mAMBMgr.search_amb_index != -1)
+            {
+                try
+                {
+                    GameObject delObj = mAMBMgr.ambObjList[mAMBMgr.search_amb_no][mAMBMgr.search_amb_index];
+                    JointMdl delJointMdl = delObj.GetComponent<JointMdl>();
+                    Transform delBaseMdl = delJointMdl.AllTransformChildren[1];
+                    if (delBaseMdl.gameObject.GetComponent<Outline>() != null)
+                    {
+                        GameObject.Destroy(delBaseMdl.gameObject.GetComponent<Outline>());
+                    }
+                    if (delObj.GetComponent<GetObjectLabel>() != null)
+                    {
+                        GameObject.Destroy(delObj.GetComponent<GetObjectLabel>());
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError(ex.ToString());
+                }
+                mAMBMgr.search_amb_no = -1;
+                mAMBMgr.search_amb_index = -1;
+            }
+        }
+
+        public void SetDrawModel(bool railFlag, bool ambFlag, bool reDrawFlag = false)
+        {
+            StartCoroutine(_SetDrawModel(railFlag, ambFlag, reDrawFlag));
+        }
+
+        public IEnumerator _SetDrawModel(bool railFlag, bool ambFlag, bool reDrawFlag)
         {
             if (railFlag)
             {
+                int editRailIndex = mRailMgr.search_rail_index;
                 SetPanelText("レール\n読み込み中...");
                 yield return null;
-                mRailMgr.search_rail_index = -1;
                 mRailMgr.SetRailData(this);
                 if (mRailMgr.isError)
                 {
@@ -105,10 +211,33 @@ namespace MainClass
                         MessageBox.Show("レール繋がり異常！\nログを確認してください", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
+
+                if (reDrawFlag && editRailIndex != -1)
+                {
+                    InitAmbObjOutlineAndLabel();
+                    InitRailObjOutlineAndLabel();
+                    GameObject railObj = mRailMgr.railObjList[editRailIndex];
+                    JointMdl jointMdl = railObj.GetComponent<JointMdl>();
+                    Transform baseMdl = jointMdl.AllTransformChildren[1];
+                    if (baseMdl.gameObject.GetComponent<Outline>() == null)
+                    {
+                        var outline = baseMdl.gameObject.AddComponent<Outline>();
+                        outline.OutlineMode = Outline.Mode.OutlineAll;
+                        outline.OutlineColor = Color.yellow;
+                        outline.OutlineWidth = 10f;
+                    }
+                    if (railObj.GetComponent<GetObjectLabel>() == null)
+                    {
+                        railObj.AddComponent<GetObjectLabel>();
+                    }
+                    mRailMgr.search_rail_index = editRailIndex;
+                }
             }
 
             if (ambFlag)
             {
+                int editAmbNo = mAMBMgr.search_amb_no;
+                int editAmbIndex = mAMBMgr.search_amb_index;
                 SetPanelText("AMB\n読み込み中...");
                 yield return null;
                 mAMBMgr.SetAmbData(this);
@@ -116,10 +245,48 @@ namespace MainClass
                 {
                     MessageBox.Show("AMB一部 配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+
+                if (reDrawFlag && editAmbNo != -1 && editAmbIndex != -1)
+                {
+                    InitRailObjOutlineAndLabel();
+                    InitAmbObjOutlineAndLabel();
+                    GameObject ambObj = mAMBMgr.ambObjList[editAmbNo][editAmbIndex];
+                    JointMdl jointMdl = ambObj.GetComponent<JointMdl>();
+                    Transform baseMdl = jointMdl.AllTransformChildren[1];
+                    if (baseMdl.gameObject.GetComponent<Outline>() == null)
+                    {
+                        var outline = baseMdl.gameObject.AddComponent<Outline>();
+                        outline.OutlineMode = Outline.Mode.OutlineAll;
+                        outline.OutlineColor = Color.yellow;
+                        outline.OutlineWidth = 10f;
+                    }
+                    if (ambObj.GetComponent<GetObjectLabel>() == null)
+                    {
+                        ambObj.AddComponent<GetObjectLabel>();
+                    }
+                    mAMBMgr.search_amb_no = editAmbNo;
+                    mAMBMgr.search_amb_index = editAmbIndex;
+                }
             }
             else
             {
                 mAMBMgr.RemoveAMB();
+            }
+            if (mRailMgr.railObjList != null && mRailMgr.railObjList.Count > 0)
+            {
+                SetActiveJumpRailButton();
+            }
+            else
+            {
+                SetDeactiveJumpRailButton();
+            }
+            if (mAMBMgr.drawAmbCount > 0)
+            {
+                SetActiveJumpAmbButton();
+            }
+            else
+            {
+                SetDeactiveJumpAmbButton();
             }
             SetPanelText("");
             yield return null;

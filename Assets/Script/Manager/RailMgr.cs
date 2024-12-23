@@ -24,6 +24,7 @@ namespace RailMgrClass
         SphereCollider sCollider;
         RaycastHit hitpos;
         Transform CanvasTr;
+        Transform DefaultPanel;
         Toggle railCheckToggle;
         public int search_rail_index;
         public bool isCheckError;
@@ -41,10 +42,11 @@ namespace RailMgrClass
             sCollider.radius = 0.025f;
 
             CanvasTr = GameObject.Find("Canvas").transform;
-            railCheckToggle = CanvasTr.Find("railCheckToggle").GetComponent<Toggle>();
-            stationBoundsToggle = CanvasTr.Find("stationBoundsToggle").GetComponent<Toggle>();
+            DefaultPanel = CanvasTr.Find("DefaultPanel").transform;
+            railCheckToggle = DefaultPanel.Find("railCheckToggle").GetComponent<Toggle>();
+            stationBoundsToggle = DefaultPanel.Find("stationBoundsToggle").GetComponent<Toggle>();
             stationBoundsToggle.onValueChanged.AddListener(StationChange);
-            comicBoundsToggle = CanvasTr.Find("comicBoundsToggle").GetComponent<Toggle>();
+            comicBoundsToggle = DefaultPanel.Find("comicBoundsToggle").GetComponent<Toggle>();
             comicBoundsToggle.onValueChanged.AddListener(ComicChange);
         }
 
@@ -124,6 +126,7 @@ namespace RailMgrClass
                 }
             }
             kasenchuObjList.Clear();
+            search_rail_index = -1;
         }
 
         public void GetModelInfo(int rail_index)

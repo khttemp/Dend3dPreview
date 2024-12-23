@@ -12,8 +12,9 @@ namespace CameraMgrClass
     public class CameraMgr : MonoBehaviour
     {
         public GameObject mainCamObj;
-        public new Camera camera;
+        Camera mCamera;
         Transform CanvasTr;
+        Transform DefaultPanel;
         InputField camMoveInputField;
         InputField camRotInputField;
         InputField camFarInputField;
@@ -33,13 +34,13 @@ namespace CameraMgrClass
         void Start()
         {
             mMain = FindMainClass();
-            mainCamObj = GameObject.FindGameObjectWithTag("MainCamera");
-            camera = mainCamObj.GetComponent<Camera>();
+            mCamera = mainCamObj.GetComponent<Camera>();
             CanvasTr = GameObject.Find("Canvas").transform;
+            DefaultPanel = CanvasTr.Find("DefaultPanel").transform;
 
-            camMoveInputField = CanvasTr.Find("MoveInputField").GetComponent<InputField>();
-            camRotInputField = CanvasTr.Find("RotInputField").GetComponent<InputField>();
-            camFarInputField = CanvasTr.Find("FarInputField").GetComponent<InputField>();
+            camMoveInputField = DefaultPanel.Find("MoveInputField").GetComponent<InputField>();
+            camRotInputField = DefaultPanel.Find("RotInputField").GetComponent<InputField>();
+            camFarInputField = DefaultPanel.Find("FarInputField").GetComponent<InputField>();
             camFarInputField.onEndEdit.AddListener(UpdateCamFar);
 
             keyConfigList = new string[] {"w", "s", "a", "d", "q", "e", "0"};
@@ -480,7 +481,7 @@ namespace CameraMgrClass
             try
             {
                 float far = System.Single.Parse(text);
-                camera.farClipPlane = far;
+                mCamera.farClipPlane = far;
             }
             catch (System.Exception)
             {

@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 using JointMdlClass;
 using RailMdlClass;
+using AmbMdlClass;
 
 namespace GetObjectLabelClass
 {
@@ -18,6 +19,7 @@ namespace GetObjectLabelClass
 
         Canvas canvas;
         Transform CanvasTr;
+        Transform DefaultPanel;
         Toggle railLabelToggle;
 
         private void Start()
@@ -42,7 +44,8 @@ namespace GetObjectLabelClass
 
             canvas = FindCanvasClass();
             CanvasTr = canvas.transform;
-            railLabelToggle = CanvasTr.Find("railLabelToggle").GetComponent<Toggle>();
+            DefaultPanel = CanvasTr.Find("DefaultPanel").transform;
+            railLabelToggle = DefaultPanel.Find("railLabelToggle").GetComponent<Toggle>();
         }
 
         Canvas FindCanvasClass()
@@ -68,53 +71,77 @@ namespace GetObjectLabelClass
 
             JointMdl jointMdl = gameObject.GetComponent<JointMdl>();
             Transform[] jointList = jointMdl.JointList;
-            Transform trans1 = jointList[1];
-
-            RailMdl railMdl = gameObject.GetComponent<RailMdl>();
-            mText1 = "レールNo." + railMdl.railNum.ToString();
-            if (railMdl.railCheck)
+            Transform trans1;
+            if (jointList.Length > 1)
             {
-                mText1 += "\nNextレール：[";
-                for (int i = 0; i < railMdl.nextRail.Count; i++)
-                {
-                    List<int[]> nextRailList = railMdl.nextRail[i];
-                    for (int j = 0; j < nextRailList.Count; j++)
-                    {
-                        mText1 += "(" + nextRailList[j][0].ToString() + ", " + nextRailList[j][1].ToString() + ")";
-                        if (j < nextRailList.Count - 1)
-                        {
-                            mText1 += ", ";
-                        }
-                    }
-                    if (i < railMdl.nextRail.Count - 1)
-                    {
-                        mText1 += " / ";
-                    }
-                }
-                mText1 += "]\n";
-                mText1 += "Prevレール：[";
-                for (int i = 0; i < railMdl.prevRail.Count; i++)
-                {
-                    List<int[]> prevRailList = railMdl.prevRail[i];
-                    for (int j = 0; j < prevRailList.Count; j++)
-                    {
-                        mText1 += "(" + prevRailList[j][0].ToString() + ", " + prevRailList[j][1].ToString() + ")";
-                        if (j < prevRailList.Count - 1)
-                        {
-                            mText1 += ", ";
-                        }
-                    }
-                    if (i < railMdl.prevRail.Count - 1)
-                    {
-                        mText1 += " / ";
-                    }
-                }
-                mText1 += "]";
+                trans1 = jointList[1];
             }
-            Transform rail0Trans = jointMdl.JointList[0];
-            Transform railLastTrans = jointMdl.LastTrans;
-            mText1 += "\nDIR  0番:" + rail0Trans.rotation.eulerAngles.x.ToString() + ", " + rail0Trans.rotation.eulerAngles.y.ToString() + ", " + rail0Trans.rotation.eulerAngles.z.ToString();
-            mText1 += "\nDIR 末番:" + railLastTrans.rotation.eulerAngles.x.ToString() + ", " + railLastTrans.rotation.eulerAngles.y.ToString() + ", " + railLastTrans.rotation.eulerAngles.z.ToString();
+            else
+            {
+                trans1 = jointList[0];
+            }
+
+            if (gameObject.GetComponent<RailMdl>() != null)
+            {
+                RailMdl railMdl = gameObject.GetComponent<RailMdl>();
+                mText1 = "レールNo." + railMdl.railNum.ToString();
+                if (railMdl.railCheck)
+                {
+                    mText1 += "\nNextレール：[";
+                    for (int i = 0; i < railMdl.nextRail.Count; i++)
+                    {
+                        List<int[]> nextRailList = railMdl.nextRail[i];
+                        for (int j = 0; j < nextRailList.Count; j++)
+                        {
+                            mText1 += "(" + nextRailList[j][0].ToString() + ", " + nextRailList[j][1].ToString() + ")";
+                            if (j < nextRailList.Count - 1)
+                            {
+                                mText1 += ", ";
+                            }
+                        }
+                        if (i < railMdl.nextRail.Count - 1)
+                        {
+                            mText1 += " / ";
+                        }
+                    }
+                    mText1 += "]\n";
+                    mText1 += "Prevレール：[";
+                    for (int i = 0; i < railMdl.prevRail.Count; i++)
+                    {
+                        List<int[]> prevRailList = railMdl.prevRail[i];
+                        for (int j = 0; j < prevRailList.Count; j++)
+                        {
+                            mText1 += "(" + prevRailList[j][0].ToString() + ", " + prevRailList[j][1].ToString() + ")";
+                            if (j < prevRailList.Count - 1)
+                            {
+                                mText1 += ", ";
+                            }
+                        }
+                        if (i < railMdl.prevRail.Count - 1)
+                        {
+                            mText1 += " / ";
+                        }
+                    }
+                    mText1 += "]";
+                }
+                Transform rail0Trans = jointMdl.JointList[0];
+                Transform railLastTrans = jointMdl.LastTrans;
+                mText1 += "\nDIR  0番:" + rail0Trans.rotation.eulerAngles.x.ToString() + ", " + rail0Trans.rotation.eulerAngles.y.ToString() + ", " + rail0Trans.rotation.eulerAngles.z.ToString();
+                mText1 += "\nDIR 末番:" + railLastTrans.rotation.eulerAngles.x.ToString() + ", " + railLastTrans.rotation.eulerAngles.y.ToString() + ", " + railLastTrans.rotation.eulerAngles.z.ToString();
+            }
+            else if (gameObject.GetComponent<AmbMdl>() != null)
+            {
+                AmbMdl ambMdl = gameObject.GetComponent<AmbMdl>();
+                mText1 = "AMB [No." + ambMdl.ParentAmbNo.ToString() + "-" + ambMdl.ChildIndex.ToString() + "](" + jointMdl.Name +  ")";
+                if (ambMdl.ParentRailNo != -1)
+                {
+                    mText1 += "\n親レール番号：" + ambMdl.ParentRailNo.ToString();
+                }
+                else
+                {
+                    mText1 += "\n親AMB番号：[" + ambMdl.ParentAmbNo.ToString() + "-" + ambMdl.ParentAmbIndex.ToString() + "]";
+                }
+            }
             mSize1 = mStyle.CalcSize(new GUIContent(mText1));
 
             Vector2 guiPosition = mCamera.WorldToScreenPoint(trans1.position);
