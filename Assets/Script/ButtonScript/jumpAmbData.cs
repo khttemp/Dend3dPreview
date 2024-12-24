@@ -207,7 +207,7 @@ public class jumpAmbData : MonoBehaviour
                 GameObject editAmbButtonObj = editAmbButton.gameObject;
                 editAmbButtonObj.SetActive(false);
                 string fileExt = Path.GetExtension(mMain.openFilename).ToLower();
-                if (".txt".Equals(fileExt))
+                if (".txt".Equals(fileExt) || ".xlsx".Equals(fileExt))
                 {
                     editAmbButtonObj.SetActive(true);
                     Text editAmbButtonText = editAmbButton.transform.Find("Text").GetComponent<Text>();

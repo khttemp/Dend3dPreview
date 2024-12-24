@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityButton = UnityEngine.UI.Button;
 using System.IO;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+using NPOI.HSSF.Util;
+using NPOI.SS.Util;
 
 using MainClass;
 using JointMdlClass;
@@ -24,6 +28,8 @@ public class editRailData : MonoBehaviour
     Main mMain;
     CameraMgr mCameraMgr;
     UnityButton OkButton;
+    XSSFWorkbook xssWorkbook;
+    ISheet iSheet;
 
     int editRailIndex;
     float floatDirX;
@@ -87,6 +93,27 @@ public class editRailData : MonoBehaviour
             if (".txt".Equals(fileExt))
             {
                 fileNameText = "【テキストファイル】\n" + Path.GetFileName(mMain.openFilename);
+            }
+            else if (".xlsx".Equals(fileExt))
+            {
+                fileNameText = "【エクセルファイル】\n" + Path.GetFileName(mMain.openFilename);
+                using (var fileStream = File.Open(mMain.openFilename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    xssWorkbook = new XSSFWorkbook(fileStream);
+                    iSheet = xssWorkbook.GetSheet("レール情報");
+                    if (iSheet != null)
+                    {
+                        fileNameText += "\nの「レール情報」シート";
+                    }
+                    else
+                    {
+                        iSheet = xssWorkbook.GetSheetAt(0);
+                        if (iSheet != null)
+                        {
+                            fileNameText += "\nの「1番目」シート";
+                        }
+                    }
+                }
             }
             fileNameLabel.text = fileNameText;
 
@@ -219,14 +246,13 @@ public class editRailData : MonoBehaviour
                     string txtFileName = Path.GetFileNameWithoutExtension(mMain.openFilename);
                     string txtFileExt = Path.GetExtension(mMain.openFilename);
                     newFilePath = Path.Combine(Path.GetDirectoryName(mMain.openFilename), txtFileName + "_new" + txtFileExt);
-                    File.WriteAllLines(newFilePath, originArray);
                     reloadFilePath = newFilePath;
                 }
                 else
                 {
-                    File.WriteAllLines(filePath, originArray);
                     reloadFilePath = filePath;
                 }
+                File.WriteAllLines(reloadFilePath, originArray);
 
                 foreach (Transform child in dialogObject.transform)
                 {
@@ -243,16 +269,59 @@ public class editRailData : MonoBehaviour
                     {
                         fileContent = reader.ReadToEnd();
                     }
-                    bool result = mMain.mStageTblMgr.Open(fileContent, mMain);
-                    if (!result)
+                    mMain.mFileReadMgr.StagedataRead(mMain, fileContent, mMain.railFlag, mMain.ambFlag, true);
+                }
+            }
+            else if (".xlsx".Equals(fileExt))
+            {
+                var row = iSheet.GetRow(mMain.excelRailFirstRowNum + mMain.mRailMgr.search_rail_index);
+                row.GetCell(6).SetCellValue(floatDirX);
+                row.GetCell(7).SetCellValue(floatDirY);
+                row.GetCell(8).SetCellValue(floatDirZ);
+                row.GetCell(11).SetCellValue(floatPer);
+
+                filePath = mMain.openFilename;
+                if (mMain.editModeFlag)
+                {
+                    string excelFileName = Path.GetFileNameWithoutExtension(mMain.openFilename);
+                    string excelFileExt = Path.GetExtension(mMain.openFilename);
+                    newFilePath = Path.Combine(Path.GetDirectoryName(mMain.openFilename), excelFileName + "_new" + excelFileExt);
+                    reloadFilePath = newFilePath;
+                }
+                else
+                {
+                    reloadFilePath = filePath;
+                }
+
+                try
+                {
+                    using(var fs = new FileStream(reloadFilePath, FileMode.Create, FileAccess.Write))
                     {
-                        MessageBox.Show("再読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        mMain.SetDrawModel(mMain.railFlag, mMain.ambFlag, true);
+                        xssWorkbook.Write(fs);
                     }
                 }
+                catch (System.IO.IOException)
+                {
+                    MessageBox.Show("書込みエラー！\n権限問題の可能性があります", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show("書込み中、予想外のエラー！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Debug.Log(ex.ToString());
+                    return;
+                }
+
+                foreach (Transform child in dialogObject.transform)
+                {
+                    UnityEngine.Object.Destroy(child.gameObject);
+                }
+                UnityEngine.Object.Destroy(dialogObject);
+                dialogObject = null;
+                DefaultPanel.gameObject.SetActive(true);
+                mCameraMgr.moveFlag = true;
+
+                mMain.mFileReadMgr.xlsxRead(mMain, reloadFilePath, mMain.railFlag, mMain.ambFlag, true);
             }
         }
         catch (System.Exception ex)

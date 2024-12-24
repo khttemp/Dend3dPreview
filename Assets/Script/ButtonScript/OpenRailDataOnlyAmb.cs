@@ -11,7 +11,6 @@ public class OpenRailDataOnlyAmb : MonoBehaviour
 {
     UnityButton button;
     Main mMain;
-    FileReadMgr mFileReadMgr;
 
     void Start()
     {
@@ -19,12 +18,11 @@ public class OpenRailDataOnlyAmb : MonoBehaviour
         button.onClick.AddListener(openRailDataOnlyAmbFunc);
         button.interactable = false;
         mMain = FindMainClass();
-        mFileReadMgr = new FileReadMgr();
     }
 
     void openRailDataOnlyAmbFunc()
     {
-        mFileReadMgr.Read(mMain, false, true);
+        mMain.mFileReadMgr.Read(mMain, false, true);
     }
 
     Main FindMainClass()

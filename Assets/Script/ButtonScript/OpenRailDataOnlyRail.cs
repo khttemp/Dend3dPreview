@@ -11,19 +11,17 @@ public class OpenRailDataOnlyRail : MonoBehaviour
 {
     UnityButton button;
     Main mMain;
-    FileReadMgr mFileReadMgr;
 
     void Start()
     {
         button = GetComponent<UnityButton>();
         button.onClick.AddListener(openFileDialogFunc);
         mMain = FindMainClass();
-        mFileReadMgr = new FileReadMgr();
     }
 
     void openFileDialogFunc()
     {
-        mFileReadMgr.Read(mMain, true, false);
+        mMain.mFileReadMgr.Read(mMain, true, false);
     }
 
     Main FindMainClass()

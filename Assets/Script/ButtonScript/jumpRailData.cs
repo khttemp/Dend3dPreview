@@ -175,7 +175,7 @@ public class jumpRailData : MonoBehaviour
                 GameObject editRailButtonObj = editRailButton.gameObject;
                 editRailButtonObj.SetActive(false);
                 string fileExt = Path.GetExtension(mMain.openFilename).ToLower();
-                if (".txt".Equals(fileExt))
+                if (".txt".Equals(fileExt) || ".xlsx".Equals(fileExt))
                 {
                     editRailButtonObj.SetActive(true);
                     Text editRailButtonText = editRailButton.transform.Find("Text").GetComponent<Text>();

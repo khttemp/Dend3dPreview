@@ -12,6 +12,7 @@ using CameraMgrClass;
 using StageTblMgrClass;
 using RailMgrClass;
 using AMBMgrClass;
+using FileReadMgrClass;
 using JointMdlClass;
 using GetObjectLabelClass;
 using RSRailMgrClass;
@@ -23,12 +24,16 @@ namespace MainClass
         public StageTblMgr mStageTblMgr = new StageTblMgr();
         public RailMgr mRailMgr;
         public AMBMgr mAMBMgr = new AMBMgr();
+        public FileReadMgr mFileReadMgr = new FileReadMgr();
         public RSRailMgr mRSRailMgr;
         public string defaultPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
         public string openFilename;
         public bool editModeFlag;
         public bool railFlag;
         public bool ambFlag;
+        public int excelRailFirstRowNum;
+        public int excelAmbFirstRowNum;
+        public bool excelAmbNewLineFlag;
         public int defaultOfdIndex = 1;
 
         Transform CanvasTr;
@@ -187,7 +192,7 @@ namespace MainClass
             }
         }
 
-        public void SetDrawModel(bool railFlag, bool ambFlag, bool reDrawFlag = false)
+        public void SetDrawModel(bool railFlag, bool ambFlag, bool reDrawFlag)
         {
             StartCoroutine(_SetDrawModel(railFlag, ambFlag, reDrawFlag));
         }

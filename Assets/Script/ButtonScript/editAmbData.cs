@@ -5,6 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityButton = UnityEngine.UI.Button;
 using System.IO;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+using NPOI.HSSF.Util;
+using NPOI.SS.Util;
 
 using MainClass;
 using JointMdlClass;
@@ -25,6 +29,8 @@ public class editAmbData : MonoBehaviour
     Main mMain;
     CameraMgr mCameraMgr;
     UnityButton OkButton;
+    XSSFWorkbook xssWorkbook;
+    ISheet iSheet;
 
     float floatPosX;
     float floatPosY;
@@ -97,6 +103,27 @@ public class editAmbData : MonoBehaviour
             if (".txt".Equals(fileExt))
             {
                 fileNameText = "【テキストファイル】\n" + Path.GetFileName(mMain.openFilename);
+            }
+            else if (".xlsx".Equals(fileExt))
+            {
+                fileNameText = "【エクセルファイル】\n" + Path.GetFileName(mMain.openFilename);
+                using (var fileStream = File.Open(mMain.openFilename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    xssWorkbook = new XSSFWorkbook(fileStream);
+                    iSheet = xssWorkbook.GetSheet("AMB情報");
+                    if (iSheet != null)
+                    {
+                        fileNameText += "\nの「AMB情報」シート";
+                    }
+                    else
+                    {
+                        iSheet = xssWorkbook.GetSheetAt(0);
+                        if (iSheet != null)
+                        {
+                            fileNameText += "\nの「1番目」シート";
+                        }
+                    }
+                }
             }
             fileNameLabel.text = fileNameText;
 
@@ -337,16 +364,85 @@ public class editAmbData : MonoBehaviour
                     {
                         fileContent = reader.ReadToEnd();
                     }
-                    bool result = mMain.mStageTblMgr.Open(fileContent, mMain);
-                    if (!result)
+                    mMain.mFileReadMgr.StagedataRead(mMain, fileContent, false, true, true);
+                }
+            }
+            else if (".xlsx".Equals(fileExt))
+            {
+                if (mMain.excelAmbNewLineFlag)
+                {
+                    int rowNum = mMain.mFileReadMgr.excelAmbIndexMap[mMain.mAMBMgr.search_amb_no];
+                    var row = iSheet.GetRow(rowNum + mMain.mAMBMgr.search_amb_index);
+                    row.GetCell(6).SetCellValue(floatPosX);
+                    row.GetCell(7).SetCellValue(floatPosY);
+                    row.GetCell(8).SetCellValue(floatPosZ);
+                    row.GetCell(9).SetCellValue(floatRotX);
+                    row.GetCell(10).SetCellValue(floatRotY);
+                    row.GetCell(11).SetCellValue(floatRotZ);
+                    row.GetCell(12).SetCellValue(floatDirX);
+                    row.GetCell(13).SetCellValue(floatDirY);
+                    row.GetCell(14).SetCellValue(floatDirZ);
+                    row.GetCell(15).SetCellValue(floatPer);
+                    row.GetCell(16).SetCellValue(floatKasenchuPer);
+                }
+                else
+                {
+                    var row = iSheet.GetRow(mMain.excelAmbFirstRowNum + mMain.mAMBMgr.search_amb_no);
+                    row.GetCell(6 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatPosX);
+                    row.GetCell(7 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatPosY);
+                    row.GetCell(8 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatPosZ);
+                    row.GetCell(9 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatRotX);
+                    row.GetCell(10 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatRotY);
+                    row.GetCell(11 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatRotZ);
+                    row.GetCell(12 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatDirX);
+                    row.GetCell(13 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatDirY);
+                    row.GetCell(14 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatDirZ);
+                    row.GetCell(15 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatPer);
+                    row.GetCell(16 + mMain.mAMBMgr.search_amb_index * 13).SetCellValue(floatKasenchuPer);
+                }
+
+                filePath = mMain.openFilename;
+                if (mMain.editModeFlag)
+                {
+                    string excelFileName = Path.GetFileNameWithoutExtension(mMain.openFilename);
+                    string excelFileExt = Path.GetExtension(mMain.openFilename);
+                    newFilePath = Path.Combine(Path.GetDirectoryName(mMain.openFilename), excelFileName + "_new" + excelFileExt);
+                    reloadFilePath = newFilePath;
+                }
+                else
+                {
+                    reloadFilePath = filePath;
+                }
+
+                try
+                {
+                    using(var fs = new FileStream(reloadFilePath, FileMode.Create, FileAccess.Write))
                     {
-                        MessageBox.Show("再読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        mMain.SetDrawModel(false, true, true);
+                        xssWorkbook.Write(fs);
                     }
                 }
+                catch (System.IO.IOException)
+                {
+                    MessageBox.Show("書込みエラー！\n権限問題の可能性があります", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show("書込み中、予想外のエラー！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Debug.Log(ex.ToString());
+                    return;
+                }
+
+                foreach (Transform child in dialogObject.transform)
+                {
+                    UnityEngine.Object.Destroy(child.gameObject);
+                }
+                UnityEngine.Object.Destroy(dialogObject);
+                dialogObject = null;
+                DefaultPanel.gameObject.SetActive(true);
+                mCameraMgr.moveFlag = true;
+
+                mMain.mFileReadMgr.xlsxRead(mMain, reloadFilePath, false, true, true);
             }
         }
         catch (System.Exception ex)

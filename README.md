@@ -88,6 +88,18 @@ AMBは、Pos、Rot、Dirのそれぞれの3要素と、Per、架線柱Perを修�
 
   エクセルでステージデータを読込ませるため
 
+* NPOI 2.5.1
+
+  エクセルを書込むため
+
+* Portable.BouncyCastle 1.9.0
+
+  NPOIの依存ライブラリー
+
+* SharpZipLib 1.2.0
+
+  NPOIの依存ライブラリー
+
 # 余談
 
 Assetsフォルダ以外は、ほぼUnityで自動で作成されるもの。

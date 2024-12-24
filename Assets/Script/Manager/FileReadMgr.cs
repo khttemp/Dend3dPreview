@@ -33,6 +33,7 @@ namespace FileReadMgrClass
             {"レール情報", "RailCnt"},
             {"要素4", "else4"}
         };
+        public Dictionary<int, int> excelAmbIndexMap = new Dictionary<int, int>();
 
         public void Read(Main mMain, bool railFlag, bool ambFlag)
         {
@@ -61,13 +62,13 @@ namespace FileReadMgrClass
                         {
                             fileContent = reader.ReadToEnd();
                         }
-                        StagedataRead(mMain, fileContent, railFlag, ambFlag);
+                        StagedataRead(mMain, fileContent, railFlag, ambFlag, false);
                     }
                     else if (".xlsx".Equals(fileExt))
                     {
                         try
                         {
-                            xlsxRead(mMain, filePath, railFlag, ambFlag);
+                            xlsxRead(mMain, filePath, railFlag, ambFlag, false);
                         }
                         catch (System.Exception ex)
                         {
@@ -105,7 +106,7 @@ namespace FileReadMgrClass
             }
         }
 
-        public void StagedataRead(Main mMain, string fileContent, bool railFlag, bool ambFlag)
+        public void StagedataRead(Main mMain, string fileContent, bool railFlag, bool ambFlag, bool reDrawFlag)
         {
             bool result = mMain.mStageTblMgr.Open(fileContent, mMain);
             if (!result)
@@ -115,23 +116,27 @@ namespace FileReadMgrClass
             else
             {
                 mMain.SetActiveAmbReadButton();
-                mMain.SetHideEditRailButton();
-                mMain.SetHideEditAmbButton();
-                mMain.InitRailObjOutlineAndLabel();
-                mMain.InitAmbObjOutlineAndLabel();
-                mMain.SetDrawModel(railFlag, ambFlag);
+                if (!reDrawFlag)
+                {
+                    mMain.SetHideEditRailButton();
+                    mMain.SetHideEditAmbButton();
+                    mMain.InitRailObjOutlineAndLabel();
+                    mMain.InitAmbObjOutlineAndLabel();
+                }
+                mMain.SetDrawModel(railFlag, ambFlag, reDrawFlag);
             }
         }
 
-        public void xlsxRead(Main mMain, string filePath, bool railFlag, bool ambFlag)
+        public void xlsxRead(Main mMain, string filePath, bool railFlag, bool ambFlag, bool reDrawFlag)
         {
-            mMain.StartCoroutine(_xlsxRead(mMain, filePath, railFlag, ambFlag));
+            mMain.StartCoroutine(_xlsxRead(mMain, filePath, railFlag, ambFlag, reDrawFlag));
         }
 
-        public IEnumerator _xlsxRead(Main mMain, string filePath, bool railFlag, bool ambFlag)
+        public IEnumerator _xlsxRead(Main mMain, string filePath, bool railFlag, bool ambFlag, bool reDrawFlag)
         {
             mMain.SetPanelText("エクセルファイル\n読み込み中...");
             yield return null;
+            excelAmbIndexMap.Clear();
             List<string> sheetKeyList = new List<string>(sheetMap.Keys);
             bool defaultXlsx = true;
             using (var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -175,7 +180,7 @@ namespace FileReadMgrClass
 
                     mMain.SetPanelText("");
                     yield return null;
-                    StagedataRead(mMain, fileContent, railFlag, ambFlag);
+                    StagedataRead(mMain, fileContent, railFlag, ambFlag, reDrawFlag);
                 }
             }
         }
@@ -258,6 +263,15 @@ namespace FileReadMgrClass
                         sb.Append("\t");
                         sb.Append(dt.Rows[index][2]);
                     }
+
+                    if ("RailCnt:".Equals(searchString))
+                    {
+                        mMain.excelRailFirstRowNum = index2 + 1;
+                    }
+                    else if ("AmbCnt:".Equals(searchString))
+                    {
+                        mMain.excelAmbFirstRowNum = index2 + 1;
+                    }
                 }
             }
             sb.Append("\n");
@@ -288,6 +302,7 @@ namespace FileReadMgrClass
                     }
                 }
             }
+            mMain.excelAmbNewLineFlag = isNewLineFlag;
 
             if (isNewLineFlag)
             {
@@ -298,12 +313,15 @@ namespace FileReadMgrClass
             int ambData = -1;
             int curData = -1;
             bool isChildFlag = false;
+            int ambNum = 0;
             for (int i = 0; i < cnt; i++)
             {
                 if (isNewLineFlag)
                 {
                     if (!isChildFlag)
                     {
+                        excelAmbIndexMap.Add(ambNum, index2 + 1 + i);
+                        ambNum++;
                         for (int j = 0; j < colNum; j++)
                         {
                             if (System.DBNull.Value.Equals(dt.Rows[index2 + 1 + i][j]))
