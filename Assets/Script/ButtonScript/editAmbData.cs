@@ -135,50 +135,61 @@ public class editAmbData : MonoBehaviour
 
             InputField ambPosXInputField = Panel.transform.Find("ambPosXInputField").GetComponent<InputField>();
             ambPosXInputField.text = amb.offsetpos.x.ToString();
+            floatPosX = amb.offsetpos.x;
             ambPosXInputField.onEndEdit.AddListener(EnterPressed);
             ambPosXInputField.onValueChanged.AddListener(ambChangeFunc);
             InputField ambPosYInputField = Panel.transform.Find("ambPosYInputField").GetComponent<InputField>();
             ambPosYInputField.text = amb.offsetpos.y.ToString();
+            floatPosY = amb.offsetpos.y;
             ambPosYInputField.onEndEdit.AddListener(EnterPressed);
             ambPosYInputField.onValueChanged.AddListener(ambChangeFunc);
             InputField ambPosZInputField = Panel.transform.Find("ambPosZInputField").GetComponent<InputField>();
             ambPosZInputField.text = amb.offsetpos.z.ToString();
+            floatPosZ = amb.offsetpos.z;
             ambPosZInputField.onEndEdit.AddListener(EnterPressed);
             ambPosZInputField.onValueChanged.AddListener(ambChangeFunc);
 
             InputField ambRotXInputField = Panel.transform.Find("ambRotXInputField").GetComponent<InputField>();
             ambRotXInputField.text = amb.dir.x.ToString();
+            floatRotX = amb.dir.x;
             ambRotXInputField.onEndEdit.AddListener(EnterPressed);
             ambRotXInputField.onValueChanged.AddListener(ambChangeFunc);
             InputField ambRotYInputField = Panel.transform.Find("ambRotYInputField").GetComponent<InputField>();
             ambRotYInputField.text = amb.dir.y.ToString();
+            floatRotY = amb.dir.y;
             ambRotYInputField.onEndEdit.AddListener(EnterPressed);
             ambRotYInputField.onValueChanged.AddListener(ambChangeFunc);
             InputField ambRotZInputField = Panel.transform.Find("ambRotZInputField").GetComponent<InputField>();
             ambRotZInputField.text = amb.dir.z.ToString();
+            floatRotZ = amb.dir.z;
             ambRotZInputField.onEndEdit.AddListener(EnterPressed);
             ambRotZInputField.onValueChanged.AddListener(ambChangeFunc);
 
             InputField ambDirXInputField = Panel.transform.Find("ambDirXInputField").GetComponent<InputField>();
             ambDirXInputField.text = amb.joint_dir.x.ToString();
+            floatDirX = amb.joint_dir.x;
             ambDirXInputField.onEndEdit.AddListener(EnterPressed);
             ambDirXInputField.onValueChanged.AddListener(ambChangeFunc);
             InputField ambDirYInputField = Panel.transform.Find("ambDirYInputField").GetComponent<InputField>();
             ambDirYInputField.text = amb.joint_dir.y.ToString();
+            floatDirY = amb.joint_dir.y;
             ambDirYInputField.onEndEdit.AddListener(EnterPressed);
             ambDirYInputField.onValueChanged.AddListener(ambChangeFunc);
             InputField ambDirZInputField = Panel.transform.Find("ambDirZInputField").GetComponent<InputField>();
             ambDirZInputField.text = amb.joint_dir.z.ToString();
+            floatDirZ = amb.joint_dir.z;
             ambDirZInputField.onEndEdit.AddListener(EnterPressed);
             ambDirZInputField.onValueChanged.AddListener(ambChangeFunc);
 
             InputField ambPerInputField = Panel.transform.Find("ambPerInputField").GetComponent<InputField>();
             ambPerInputField.text = amb.per.ToString();
+            floatPer = amb.per;
             ambPerInputField.onEndEdit.AddListener(EnterPressed);
             ambPerInputField.onValueChanged.AddListener(ambChangeFunc);
 
             InputField ambKasenchuPerInputField = Panel.transform.Find("ambKasenchuPerInputField").GetComponent<InputField>();
             ambKasenchuPerInputField.text = amb.size_per.ToString();
+            floatKasenchuPer = amb.size_per;
             if (mMain.mAMBMgr.keyList.Contains(ambObjJointMdl.Name.ToUpper()))
             {
                 ambKasenchuPerInputField.onEndEdit.AddListener(EnterPressed);
@@ -305,9 +316,11 @@ public class editAmbData : MonoBehaviour
                 string fileContent = File.ReadAllText(mMain.openFilename);
                 string[] separator = new string[]
                 {
-                    "\r\n"
+                    "\n"
                 };
                 string[] originArray = fileContent.Split(separator, System.StringSplitOptions.None);
+                System.Array.ForEach(originArray, x => x.Trim('\r'));
+
                 int ambDataTxtIndex = mMain.mStageTblMgr.getAmbDataTxtIndex(mMain.mAMBMgr.search_amb_no, fileContent, originArray, mMain);
                 if (ambDataTxtIndex == -1)
                 {

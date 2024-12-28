@@ -426,10 +426,19 @@ namespace StageTblMgrClass
                     if (array[i].Contains("RailCnt:"))
                     {
                         railCntIndex = i;
-                        railData = array[i + 1 + railIndex];
                         break;
                     }
                 }
+                for (int i = railCntIndex + 1; i < array.Length; i++)
+                {
+                    if (array[i].StartsWith("//"))
+                    {
+                        continue;
+                    }
+                    railData = array[i + railIndex];
+                    break;
+                }
+
                 int originRailCntIndex = -1;
                 int originAmbCntIndex = -1;
                 for (int i = 0; i < originArray.Length; i++)
@@ -453,7 +462,6 @@ namespace StageTblMgrClass
                     mMain.DebugError("レールNo." + railIndex + "のデータを探せません");
                     return originRailDataIndex;
                 }
-
                 for (int i = originRailCntIndex + 1; i < originAmbCntIndex; i++)
                 {
                     if (railData.Equals(originArray[i]))
@@ -495,10 +503,19 @@ namespace StageTblMgrClass
                     if (array[i].Contains("AmbCnt:"))
                     {
                         ambCntIndex = i;
-                        ambData = array[i + 1 + ambNo];
                         break;
                     }
                 }
+                for (int i = ambCntIndex + 1; i < array.Length; i++)
+                {
+                    if (array[i].StartsWith("//"))
+                    {
+                        continue;
+                    }
+                    ambData = array[i + ambNo];
+                    break;
+                }
+
                 int originAmbCntIndex = -1;
                 for (int i = 0; i < originArray.Length; i++)
                 {

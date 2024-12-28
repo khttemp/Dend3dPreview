@@ -125,18 +125,22 @@ public class editRailData : MonoBehaviour
 
             InputField railDirXInputField = Panel.transform.Find("railDirXInputField").GetComponent<InputField>();
             railDirXInputField.text = r.dir.x.ToString();
+            floatDirX = r.dir.x;
             railDirXInputField.onEndEdit.AddListener(EnterPressed);
             railDirXInputField.onValueChanged.AddListener(railDirChangeFunc);
             InputField railDirYInputField = Panel.transform.Find("railDirYInputField").GetComponent<InputField>();
             railDirYInputField.text = r.dir.y.ToString();
+            floatDirY = r.dir.y;
             railDirYInputField.onEndEdit.AddListener(EnterPressed);
             railDirYInputField.onValueChanged.AddListener(railDirChangeFunc);
             InputField railDirZInputField = Panel.transform.Find("railDirZInputField").GetComponent<InputField>();
             railDirZInputField.text = r.dir.z.ToString();
+            floatDirZ = r.dir.z;
             railDirZInputField.onEndEdit.AddListener(EnterPressed);
             railDirZInputField.onValueChanged.AddListener(railDirChangeFunc);
             InputField railPerInputField = Panel.transform.Find("railPerInputField").GetComponent<InputField>();
             railPerInputField.text = r.per.ToString();
+            floatPer = r.per;
             railPerInputField.onEndEdit.AddListener(EnterPressed);
             railPerInputField.onValueChanged.AddListener(railDirChangeFunc);
 
@@ -219,9 +223,11 @@ public class editRailData : MonoBehaviour
                 string fileContent = File.ReadAllText(mMain.openFilename);
                 string[] separator = new string[]
                 {
-                    "\r\n"
+                    "\n"
                 };
                 string[] originArray = fileContent.Split(separator, System.StringSplitOptions.None);
+                System.Array.ForEach(originArray, x => x.Trim('\r'));
+
                 int railDataTxtIndex = mMain.mStageTblMgr.getRailDataTxtIndex(mMain.mRailMgr.search_rail_index, fileContent, originArray, mMain);
                 if (railDataTxtIndex == -1)
                 {
