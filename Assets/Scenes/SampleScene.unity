@@ -996,6 +996,9 @@ MonoBehaviour:
   editModeFlag: 0
   railFlag: 0
   ambFlag: 0
+  excelRailFirstRowNum: 0
+  excelAmbFirstRowNum: 0
+  excelAmbNewLineFlag: 0
   defaultOfdIndex: 1
   isAllDebug: 0
   isDebug: 0

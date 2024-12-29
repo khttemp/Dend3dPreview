@@ -319,7 +319,10 @@ public class editAmbData : MonoBehaviour
                     "\n"
                 };
                 string[] originArray = fileContent.Split(separator, System.StringSplitOptions.None);
-                System.Array.ForEach(originArray, x => x.Trim('\r'));
+                for (int i = 0; i < originArray.Length; i++)
+                {
+                    originArray[i] = originArray[i].Trim('\r');
+                }
 
                 int ambDataTxtIndex = mMain.mStageTblMgr.getAmbDataTxtIndex(mMain.mAMBMgr.search_amb_no, fileContent, originArray, mMain);
                 if (ambDataTxtIndex == -1)

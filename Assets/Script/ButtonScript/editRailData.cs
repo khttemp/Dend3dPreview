@@ -226,7 +226,10 @@ public class editRailData : MonoBehaviour
                     "\n"
                 };
                 string[] originArray = fileContent.Split(separator, System.StringSplitOptions.None);
-                System.Array.ForEach(originArray, x => x.Trim('\r'));
+                for (int i = 0; i < originArray.Length; i++)
+                {
+                    originArray[i] = originArray[i].Trim('\r');
+                }
 
                 int railDataTxtIndex = mMain.mStageTblMgr.getRailDataTxtIndex(mMain.mRailMgr.search_rail_index, fileContent, originArray, mMain);
                 if (railDataTxtIndex == -1)

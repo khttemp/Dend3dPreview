@@ -435,7 +435,7 @@ namespace StageTblMgrClass
                     {
                         continue;
                     }
-                    railData = array[i + railIndex];
+                    railData = array[i + railIndex].Trim('\r');
                     break;
                 }
 
@@ -512,7 +512,7 @@ namespace StageTblMgrClass
                     {
                         continue;
                     }
-                    ambData = array[i + ambNo];
+                    ambData = array[i + ambNo].Trim('\r');
                     break;
                 }
 

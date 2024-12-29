@@ -44,7 +44,7 @@ namespace AMBMgrClass
                 {"AMB_Mina_Wall2", new string[]{"obj8", "", "", ""}},
                 {"AMB_SAKU", new string[]{"st_saku_obj", "", "", ""}},
                 {"AMB_Toyo_Kasenchu", new string[]{"obj71", "LeftPos", "", ""}},
-                {"AMB_TQ_Kaidan3", new string[]{"st_saku_obj", "", "", ""}},
+                {"AMB_TQ_Kaidan3", new string[]{"obj40", "", "", ""}},
                 {"TQ_Eda_Iron", new string[]{"Mesh0", "Left", "Right", ""}},
                 {"TQ_Eda_Yane", new string[]{"J00", "", "", "Hashira"}}
             };
