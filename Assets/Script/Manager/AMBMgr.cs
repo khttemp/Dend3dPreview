@@ -31,7 +31,7 @@ namespace AMBMgrClass
         public AMBMgr()
         {
             origin_size_per_dict = new Dictionary<string, string[]>(){
-                {"AMB_BLACK_CHU", new string[]{"AMB_BLACK_CHU", "", "", ""}},
+                {"AMB_BLACK_CHU", new string[]{"AMB_BLACK_CHU 1", "", "", ""}},
                 {"AMB_BlackCube", new string[]{"Scale", "", "", ""}},
                 {"AMB_HQ_KasenLong0", new string[]{"center_bar", "LeftPos", "RightPos", ""}},
                 {"AMB_Kaidan2", new string[]{"Center", "LeftPos", "RightPos", ""}},
