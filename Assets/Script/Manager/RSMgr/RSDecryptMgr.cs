@@ -550,6 +550,10 @@ namespace RSDecryptClass
                         else if ("ComicScript".Equals(searchString))
                         {
                             int val = -1;
+                            if (j >= 4)
+                            {
+                                break;
+                            }
                             if (!int.TryParse(s, out val))
                             {
                                 mMain.DebugError(sheetName + "シートの" + i + "番目 値が不正(" + s + ")");

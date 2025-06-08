@@ -38,12 +38,6 @@ namespace RSRailMgrClass
             if (railObj == null) {
                 return false;
             }
-            else if (railObj.name.Equals("EmptyObj"))
-            {
-                railObj.name = railObj.name + "_(" + rail_index + ")";
-                railObjList.Add(railObj);
-                return true;
-            }
             railObj.AddComponent<JointMdl>();
             JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
             railObjJointMdl.Name = railObj.name;
@@ -61,10 +55,6 @@ namespace RSRailMgrClass
         public void GetModelInfo(int rail_index)
         {
             GameObject railObj = railObjList[rail_index];
-            if (railObj.name.Contains("EmptyObj"))
-            {
-                return;
-            }
             JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
             railObjJointMdl.GetJointTransForm(railObj);
         }
@@ -78,10 +68,6 @@ namespace RSRailMgrClass
         public void AutoSet(int rail_index, rs_rail_list r, Main mMain)
         {
             GameObject railObj = railObjList[rail_index];
-            if (railObj.name.Contains("EmptyObj"))
-            {
-                return;
-            }
             JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
             railObjJointMdl.BasePos = r.offsetpos;
             railObjJointMdl.JointDir = r.dir;
@@ -96,7 +82,6 @@ namespace RSRailMgrClass
             }
             RailMdl railMdl = railObj.GetComponent<RailMdl>();
             GetRailCnt(railMdl, railObjJointMdl, rail_index);
-            GetKasen(railMdl, railObjJointMdl, rail_index);
         }
 
         public void GetRailCnt(RailMdl railMdl, JointMdl railObjJointMdl, int rail_index)
@@ -141,101 +126,9 @@ namespace RSRailMgrClass
             }
         }
 
-        public void GetKasen(RailMdl railMdl, JointMdl railObjJointMdl, int rail_index)
-        {
-            List<Transform> findChildTransList = railObjJointMdl.AllTransformChildren;
-            railMdl.railKasenStartPosList = new Transform[railMdl.railCnt];
-            railMdl.railKasenMdlStartPosList = new Transform[railMdl.railCnt];
-            railMdl.railKasenMdlEndPosList = new Transform[railMdl.railCnt];
-            for (int i = 0; i < railMdl.railCnt; i++)
-            {
-                string rail_name = "R" + (i * 100).ToString("D3");
-                List<Transform> railTransList = findChildTransList.FindAll(x => x.name.Contains(rail_name));
-                if (railTransList != null)
-                {
-                    foreach (Transform railTrans in railTransList)
-                    {
-                        string kasen_name = "L" + (i * 100).ToString("D3");
-                        string mdl_start_name = "N00";
-                        string mdl_end_name = "N01";
-                        Transform[] findKasenTransList = railTrans.GetComponentsInChildren<Transform>(true);
-                        railMdl.railKasenStartPosList[i] = null;
-                        railMdl.railKasenMdlStartPosList[i] = null;
-                        railMdl.railKasenMdlEndPosList[i] = null;
-                        for (int j = 0; j < findKasenTransList.Length; j++)
-                        {
-                            if (findKasenTransList[j].name.Contains(kasen_name))
-                            {
-                                railMdl.railKasenStartPosList[i] = findKasenTransList[j];
-                            }
-                            else if (findKasenTransList[j].name.Contains(mdl_start_name))
-                            {
-                                railMdl.railKasenMdlStartPosList[i] = findKasenTransList[j];
-                            }
-                            else if (findKasenTransList[j].name.Contains(mdl_end_name))
-                            {
-                                railMdl.railKasenMdlEndPosList[i] = findKasenTransList[j];
-                            }
-                        }
-                        if (railMdl.railKasenStartPosList[i] != null && railMdl.railKasenMdlStartPosList[i] != null && railMdl.railKasenMdlEndPosList[i] != null)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-            railMdl.railKasenEndPosList = new Transform[railMdl.railCnt];
-            for (int i = 0; i < railMdl.railCnt; i++)
-            {
-                string kasen_name = "L" + (i * 100 + 1).ToString("D3");
-                int end_index = railMdl.railTransformList.Length / railMdl.railCnt - 1;
-                Transform[] findKasenTransList = railMdl.railTransformList[i, end_index].GetComponentsInChildren<Transform>(true);
-                for (int j = 0; j < findKasenTransList.Length; j++)
-                {
-                    if (findKasenTransList[j].name.Contains(kasen_name))
-                    {
-                        railMdl.railKasenEndPosList[i] = findKasenTransList[j];
-                        break;
-                    }
-                }
-            }
-            RailKasenUpdateDir(railMdl, rail_index);
-        }
-
-        public void RailKasenUpdateDir(RailMdl railMdl, int rail_index)
-        {
-            for (int i = 0; i < railMdl.railCnt; i++)
-            {
-                if (railMdl.railKasenStartPosList[i] == null)
-                {
-                    continue;
-                }
-                if (railMdl.railKasenEndPosList[i] == null)
-                {
-                    continue;
-                }
-                railMdl.railKasenStartPosList[i].LookAt(railMdl.railKasenEndPosList[i].position);
-                if (railMdl.railKasenMdlStartPosList[i] == null)
-                {
-                    continue;
-                }
-                if (railMdl.railKasenMdlEndPosList[i] == null)
-                {
-                    continue;
-                }
-                float posLength = Vector3.Distance(railMdl.railKasenStartPosList[i].position, railMdl.railKasenEndPosList[i].position);
-                float MdlLength = Vector3.Distance(railMdl.railKasenMdlStartPosList[i].position, railMdl.railKasenMdlEndPosList[i].position);
-                railMdl.railKasenStartPosList[i].localScale = new Vector3(1f, 1f, posLength / MdlLength);
-            }
-        }
-
         public void InitPos(int rail_index, rs_rail_list[] rail_list_array, Main mMain)
         {
             GameObject railObj = railObjList[rail_index];
-            if (railObj.name.Contains("EmptyObj"))
-            {
-                return;
-            }
             JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
             rs_rail_list r = rail_list_array[rail_index];
             if ((r.flg & (1U << 31)) > 0 )
@@ -253,11 +146,6 @@ namespace RSRailMgrClass
                 return;
             }
             GameObject prevRailObj = railObjList[r.prev_rail];
-            if (prevRailObj.name.Contains("EmptyObj") || prevRailObj.activeSelf == false)
-            {
-                railObj.SetActive(false);
-                return;
-            }
             JointMdl prevRailObjJointMdl = prevRailObj.GetComponent<JointMdl>();
             if (!prevRailObjJointMdl.InitPosFlg)
             {
