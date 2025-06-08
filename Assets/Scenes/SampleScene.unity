@@ -1000,6 +1000,7 @@ MonoBehaviour:
   excelAmbFirstRowNum: 0
   excelAmbNewLineFlag: 0
   defaultOfdIndex: 1
+  modelDisplayMode: 0
   isAllDebug: 0
   isDebug: 0
 --- !u!1 &420426389

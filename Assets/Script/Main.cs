@@ -49,6 +49,7 @@ namespace MainClass
         GameObject loadingPanel;
         Text loadingText;
 
+        public int modelDisplayMode = 0;
         public bool isAllDebug;
         public bool isDebug;
 

@@ -7,6 +7,7 @@ using System.IO;
 
 using MainClass;
 using JointMdlClass;
+using AmbMdlClass;
 using CameraMgrClass;
 using GetObjectLabelClass;
 
@@ -201,6 +202,9 @@ public class jumpAmbData : MonoBehaviour
                 }
                 mMain.mAMBMgr.search_amb_no = intVal;
                 mMain.mAMBMgr.search_amb_index = intIndex;
+                GameObject searchParentAmbObj = mMain.mAMBMgr.ambObjList[intVal][0];
+                AmbMdl searchAmbMdl = searchParentAmbObj.GetComponent<AmbMdl>();
+                mMain.mRailMgr.DisplayRail(mMain.modelDisplayMode, searchAmbMdl.ParentRailNo, mMain);
 
                 GameObject editRailButtonObj = editRailButton.gameObject;
                 editRailButtonObj.SetActive(false);

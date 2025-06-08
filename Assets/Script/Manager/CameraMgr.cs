@@ -205,6 +205,7 @@ namespace CameraMgrClass
                 "UP_KEY",
                 "DOWN_KEY",
                 "MOUSE_WHEEL_FLAG",
+                "MODEL_DISPLAY_MODE",
                 "ALL_DEBUG",
                 "DEBUG"
             };
@@ -220,6 +221,7 @@ namespace CameraMgrClass
                 {"UP_KEY", keyConfigList[4]},
                 {"DOWN_KEY", keyConfigList[5]},
                 {"MOUSE_WHEEL_FLAG", keyConfigList[6]},
+                {"MODEL_DISPLAY_MODE", "0"},
                 {"ALL_DEBUG", "0"},
                 {"DEBUG", "0"}
             };
@@ -362,6 +364,10 @@ namespace CameraMgrClass
                         {
                             mouseWheelFindFlag = true;
                             keyConfigList[6] = collection[1];
+                        }
+                        else if (collection[0].Equals("MODEL_DISPLAY_MODE"))
+                        {
+                            mMain.modelDisplayMode = System.Convert.ToInt32(collection[1]);
                         }
                         else if (collection[0].Equals("ALL_DEBUG"))
                         {

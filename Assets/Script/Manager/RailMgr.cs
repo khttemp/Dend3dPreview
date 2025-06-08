@@ -151,6 +151,7 @@ namespace RailMgrClass
                 railObjJointMdl.InitPosFlg = true;
             }
             RailMdl railMdl = railObj.GetComponent<RailMdl>();
+            railMdl.block = r.block;
             GameObject kasenchuObject = railMdl.kasenchuObject;
             if (kasenchuObject != null)
             {
@@ -816,6 +817,61 @@ namespace RailMgrClass
                 MessageBox.Show("予想外のエラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.LogError(e.ToString());
                 mMain.DebugError(e.ToString());
+            }
+        }
+
+        public void DisplayRail(int modelDisplayMode, int searchRailIndex, Main mMain)
+        {
+            try
+            {
+                GameObject searchRailObj = railObjList[searchRailIndex];
+                RailMdl searchRailMdl = searchRailObj.GetComponent<RailMdl>();
+                int currentBlock = searchRailMdl.block;
+                DisplayRailModel(modelDisplayMode, currentBlock, mMain);
+            }
+            catch (System.Exception e)
+            {
+                MessageBox.Show("予想外のエラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debug.LogError(e.ToString());
+                mMain.DebugError(e.ToString());
+            }
+        }
+
+        public void DisplayRailModel(int modelDisplayMode, int currentBlock, Main mMain)
+        {
+            for (int i = 0; i < railObjList.Count; i++)
+            {
+                GameObject railObj = railObjList[i];
+                RailMdl railMdl = railObj.GetComponent<RailMdl>();
+                if (modelDisplayMode == 0)
+                {
+                    railObj.SetActive(true);
+                }
+                else
+                {
+                    if (modelDisplayMode == 1)
+                    {
+                        if (railMdl.block == currentBlock)
+                        {
+                            railObj.SetActive(true);
+                        }
+                        else
+                        {
+                            railObj.SetActive(false);
+                        }
+                    }
+                    else if (modelDisplayMode == 2)
+                    {
+                        if (railMdl.block >= currentBlock - 1 && railMdl.block <= currentBlock + 3)
+                        {
+                            railObj.SetActive(true);
+                        }
+                        else
+                        {
+                            railObj.SetActive(false);
+                        }
+                    }
+                }
             }
         }
 

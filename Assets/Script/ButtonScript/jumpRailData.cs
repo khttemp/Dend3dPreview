@@ -169,6 +169,7 @@ public class jumpRailData : MonoBehaviour
                     railObj.AddComponent<GetObjectLabel>();
                 }
                 mMain.mRailMgr.search_rail_index = intVal;
+                mMain.mRailMgr.DisplayRail(mMain.modelDisplayMode, mMain.mRailMgr.search_rail_index, mMain);
 
                 GameObject editAmbButtonObj = editAmbButton.gameObject;
                 editAmbButtonObj.SetActive(false);
