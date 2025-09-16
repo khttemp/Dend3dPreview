@@ -4,9 +4,9 @@ using UnityEngine;
 
 using MainClass;
 
-namespace JointMdlClass
+namespace RSJointMdlClass
 {
-    public class JointMdl : MonoBehaviour
+    public class RSJointMdl : MonoBehaviour
     {
         public Transform BaseJoint;
         public Transform[] JointList;
@@ -40,23 +40,9 @@ namespace JointMdlClass
             for (int i = 0; i < AllTransformChildren.Count; i++)
             {
                 string transformName = AllTransformChildren[i].name;
-                if (this.Name.ToUpper().Equals("AMB_ST_KAIDAN_D4".ToUpper()) || this.Name.ToUpper().Equals("GroundFlash".ToUpper()))
+                if (transformName.ToUpper().Equals("BASE"))
                 {
-                    this.BaseJoint = null;
-                }
-                else if (this.Name.ToUpper().Equals("AMB_1Rail_Den_25_Under".ToUpper()))
-                {
-                    if (transformName.ToUpper().Equals("J00"))
-                    {
-                        this.BaseJoint = AllTransformChildren[i];
-                    }
-                }
-                else
-                {
-                    if (transformName.ToUpper().Equals("BASE"))
-                    {
-                        this.BaseJoint = AllTransformChildren[i];
-                    }
+                    this.BaseJoint = AllTransformChildren[i];
                 }
             }
 
@@ -102,10 +88,20 @@ namespace JointMdlClass
             return list;
         }
 
+        public Vector3 getNormalizeAngle(Vector3 vec)
+        {
+            vec.x = Mathf.Floor(vec.x * 65536 / 360.0f) * 360 / 65536.0f;
+            vec.y = Mathf.Floor(vec.y * 65536 / 360.0f) * 360 / 65536.0f;
+            vec.z = Mathf.Floor(vec.z * 65536 / 360.0f) * 360 / 65536.0f;
+            return vec;
+        }
+
         public void UpdateJointDir()
         {
             UpdateJointScale();
-            this.One_Dir = this.JointDir / (float)this.JointList.Length;
+            this.One_Dir = this.JointDir / (float)(this.JointList.Length - 1);
+            this.One_Dir = getNormalizeAngle(this.One_Dir);
+            Debug.Log(this.One_Dir.x + ", " + this.One_Dir.y + ", " + this.One_Dir.z);
             this.One_Qua = Quaternion.Euler(this.One_Dir);
             for (int i = 0; i < this.JointList.Length - 1; i++)
             {
@@ -126,7 +122,7 @@ namespace JointMdlClass
             {
                 return;
             }
-            this.JointList[this.JointList.Length - 2].localScale = new Vector3(1f, 1f, this.LengthPer);
+            this.BaseJoint.localScale = new Vector3(1f, 1f, this.LengthPer);
             this.old_length_per = this.LengthPer;
         }
 

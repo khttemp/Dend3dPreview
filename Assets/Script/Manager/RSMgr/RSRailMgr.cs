@@ -9,7 +9,7 @@ using RSMdlMgrClass;
 using RSDecryptClass;
 using RSRailListClass;
 
-using JointMdlClass;
+using RSJointMdlClass;
 
 namespace RSRailMgrClass
 {
@@ -38,8 +38,8 @@ namespace RSRailMgrClass
             if (railObj == null) {
                 return false;
             }
-            railObj.AddComponent<JointMdl>();
-            JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
+            railObj.AddComponent<RSJointMdl>();
+            RSJointMdl railObjJointMdl = railObj.GetComponent<RSJointMdl>();
             railObjJointMdl.Name = railObj.name;
 
             railObj.AddComponent<RailMdl>();
@@ -55,7 +55,7 @@ namespace RSRailMgrClass
         public void GetModelInfo(int rail_index)
         {
             GameObject railObj = railObjList[rail_index];
-            JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
+            RSJointMdl railObjJointMdl = railObj.GetComponent<RSJointMdl>();
             railObjJointMdl.GetJointTransForm(railObj);
         }
 
@@ -68,14 +68,14 @@ namespace RSRailMgrClass
         public void AutoSet(int rail_index, rs_rail_list r, Main mMain)
         {
             GameObject railObj = railObjList[rail_index];
-            JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
+            RSJointMdl railObjJointMdl = railObj.GetComponent<RSJointMdl>();
             railObjJointMdl.BasePos = r.offsetpos;
             railObjJointMdl.JointDir = r.dir;
             railObjJointMdl.old_joint_dir = Vector3.zero;
+            railObjJointMdl.LengthPer = r.per;
             railObjJointMdl.UpdateJointDir();
             railObjJointMdl.UpdateOffsetPos();
             railObjJointMdl.UpdateBaseRot();
-            railObjJointMdl.BaseJoint.localScale = new Vector3(1f, 1f, r.per);
             if (rail_index == 0)
             {
                 railObjJointMdl.InitPosFlg = true;
@@ -84,7 +84,7 @@ namespace RSRailMgrClass
             GetRailCnt(railMdl, railObjJointMdl, rail_index);
         }
 
-        public void GetRailCnt(RailMdl railMdl, JointMdl railObjJointMdl, int rail_index)
+        public void GetRailCnt(RailMdl railMdl, RSJointMdl railObjJointMdl, int rail_index)
         {
             railMdl.railCnt = 0;
             for (int i = 0; i < 4; i++)
@@ -129,7 +129,7 @@ namespace RSRailMgrClass
         public void InitPos(int rail_index, rs_rail_list[] rail_list_array, Main mMain)
         {
             GameObject railObj = railObjList[rail_index];
-            JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
+            RSJointMdl railObjJointMdl = railObj.GetComponent<RSJointMdl>();
             rs_rail_list r = rail_list_array[rail_index];
             if ((r.flg & (1U << 31)) > 0 )
             {
@@ -146,7 +146,7 @@ namespace RSRailMgrClass
                 return;
             }
             GameObject prevRailObj = railObjList[r.prev_rail];
-            JointMdl prevRailObjJointMdl = prevRailObj.GetComponent<JointMdl>();
+            RSJointMdl prevRailObjJointMdl = prevRailObj.GetComponent<RSJointMdl>();
             if (!prevRailObjJointMdl.InitPosFlg)
             {
                 Init(r.prev_rail, rail_list_array, mMain);
