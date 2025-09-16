@@ -46,61 +46,69 @@ namespace FileReadMgrClass
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 string filePath = ofd.FileName;
-                string fileExt = Path.GetExtension(filePath).ToLower();
                 mMain.openFilename = filePath;
-                mMain.railFlag = railFlag;
-                mMain.ambFlag = ambFlag;
                 mMain.defaultPath = Path.GetDirectoryName(filePath);
                 mMain.defaultOfdIndex = ofd.FilterIndex;
-                string fileContent = string.Empty;
-                if (ofd.FilterIndex == 1)
+                mMain.ChangeReadFileText(Path.GetFileName(mMain.openFilename));
+                mMain.railFlag = railFlag;
+                mMain.ambFlag = ambFlag;
+                ReadFile(mMain, filePath);
+            }
+        }
+
+        public void ReadFile(Main mMain, string filePath)
+        {
+            string fileExt = Path.GetExtension(filePath).ToLower();
+            mMain.readFileFlag = true;
+            mMain.loadingFlag = true;
+            string fileContent = string.Empty;
+            if (mMain.defaultOfdIndex == 1)
+            {
+                if (".txt".Equals(fileExt))
                 {
-                    if (".txt".Equals(fileExt))
+                    var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using (StreamReader reader = new StreamReader(fileStream))
                     {
-                        var fileStream = ofd.OpenFile();
-                        using (StreamReader reader = new StreamReader(fileStream))
-                        {
-                            fileContent = reader.ReadToEnd();
-                        }
-                        StagedataRead(mMain, fileContent, railFlag, ambFlag, false);
+                        fileContent = reader.ReadToEnd();
                     }
-                    else if (".xlsx".Equals(fileExt))
+                    StagedataRead(mMain, fileContent, mMain.railFlag, mMain.ambFlag, false);
+                }
+                else if (".xlsx".Equals(fileExt))
+                {
+                    try
                     {
-                        try
-                        {
-                            xlsxRead(mMain, filePath, railFlag, ambFlag, false);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            MessageBox.Show("予想外のエラー", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            mMain.DebugError(ex.ToString());
-                            mMain.SetPanelText("");
-                        }
+                        xlsxRead(mMain, filePath, mMain.railFlag, mMain.ambFlag, false);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MessageBox.Show("予想外のエラー", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.DebugError(ex.ToString());
+                        mMain.SetPanelText("");
                     }
                 }
-                else if (ofd.FilterIndex == 2)
+            }
+            else if (mMain.defaultOfdIndex == 2)
+            {
+                if (".bin".Equals(fileExt))
                 {
-                    if (".bin".Equals(fileExt))
+                    if (!mMain.mRSRailMgr.mRSDecryptMgr.Decrypt(filePath, mMain))
                     {
-                        if (!mMain.mRSRailMgr.mRSDecryptMgr.Decrypt(filePath, mMain))
-                        {
-                            MessageBox.Show("レールデータ読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            return;
-                        }
-                        RSStagedataRead(mMain);
+                        MessageBox.Show("レールデータ読込失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
                     }
-                    else if (".xlsx".Equals(fileExt))
+                    RSStagedataRead(mMain);
+                }
+                else if (".xlsx".Equals(fileExt))
+                {
+                    try
                     {
-                        try
-                        {
-                            rsXlsxRead(mMain, filePath, railFlag, ambFlag);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            MessageBox.Show("予想外のエラー", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            mMain.DebugError(ex.ToString());
-                            mMain.SetPanelText("");
-                        }
+                        rsXlsxRead(mMain, filePath, mMain.railFlag, mMain.ambFlag);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MessageBox.Show("予想外のエラー", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        mMain.DebugError(ex.ToString());
+                        mMain.SetPanelText("");
                     }
                 }
             }

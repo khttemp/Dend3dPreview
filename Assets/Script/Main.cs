@@ -35,6 +35,8 @@ namespace MainClass
         public int excelAmbFirstRowNum;
         public bool excelAmbNewLineFlag;
         public int defaultOfdIndex = 1;
+        public bool readFileFlag = false;
+        public bool loadingFlag = false;
 
         Transform CanvasTr;
         Transform DefaultPanel;
@@ -44,6 +46,7 @@ namespace MainClass
         UnityButton jumpAmbButton;
         UnityButton editRailButton;
         UnityButton editAmbButton;
+        InputField readFileInputField;
         Toggle cameraToggle;
 
         GameObject loadingPanel;
@@ -73,6 +76,7 @@ namespace MainClass
             editModeFlag = true;
             editRailButton = DefaultPanel.Find("editRailButton").GetComponent<UnityButton>();
             editAmbButton = DefaultPanel.Find("editAmbButton").GetComponent<UnityButton>();
+            readFileInputField = DefaultPanel.Find("ReadFileInputField").GetComponent<InputField>();
             cameraToggle = DefaultPanel.Find("cameraToggle").GetComponent<Toggle>();
 
             string loadingPanelPath = "dialogPrefab/LoadingPanel";
@@ -82,6 +86,22 @@ namespace MainClass
             loadingText = loadingPanel.transform.Find("LoadingText").GetComponent<Text>();
 
             SetDeactiveAmbReadButton();
+        }
+
+        public void Update()
+        {
+            if (!readFileFlag)
+            {
+                return;
+            }
+            if (loadingFlag)
+            {
+                return;
+            }
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                mFileReadMgr.ReadFile(this, openFilename);
+            }
         }
 
         CameraMgr FindCameraMgrClass()
@@ -297,6 +317,7 @@ namespace MainClass
             SetPanelText("");
             yield return null;
             SetInitCamera();
+            loadingFlag = false;
         }
 
         public void SetInitCamera()
@@ -307,6 +328,11 @@ namespace MainClass
                 mCameraMgr.mainCamObj.transform.rotation = Quaternion.Euler(initRotVector);
             }
             mCameraMgr.moveFlag = true;
+        }
+
+        public void ChangeReadFileText(string text)
+        {
+            readFileInputField.text = text;
         }
 
         public void SetRSDrawModel()

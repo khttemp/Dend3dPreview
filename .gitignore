@@ -75,3 +75,4 @@ crashlytics-build.properties
 !*.gitkeep
 *.ini
 *.ini.meta
+/[Aa]ssets/[Rr]esources/old*
