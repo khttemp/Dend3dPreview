@@ -48,6 +48,8 @@ namespace MainClass
         UnityButton editAmbButton;
         InputField readFileInputField;
         Toggle cameraToggle;
+        Toggle reloadRailToggle;
+        Toggle reloadAmbToggle;
 
         GameObject loadingPanel;
         Text loadingText;
@@ -78,6 +80,10 @@ namespace MainClass
             editAmbButton = DefaultPanel.Find("editAmbButton").GetComponent<UnityButton>();
             readFileInputField = DefaultPanel.Find("ReadFileInputField").GetComponent<InputField>();
             cameraToggle = DefaultPanel.Find("cameraToggle").GetComponent<Toggle>();
+            reloadRailToggle = DefaultPanel.Find("reloadRailToggle").GetComponent<Toggle>();
+            reloadRailToggle.onValueChanged.AddListener(ChangeReloadRailToggle);
+            reloadAmbToggle = DefaultPanel.Find("reloadAmbToggle").GetComponent<Toggle>();
+            reloadAmbToggle.onValueChanged.AddListener(ChangeReloadAmbToggle);
 
             string loadingPanelPath = "dialogPrefab/LoadingPanel";
             loadingPanel = (UnityEngine.Object.Instantiate(Resources.Load(loadingPanelPath)) as GameObject);
@@ -333,6 +339,28 @@ namespace MainClass
         public void ChangeReadFileText(string text)
         {
             readFileInputField.text = text;
+        }
+
+        public void SetActiveReloadRailToggle(bool state)
+        {
+            reloadRailToggle.interactable = state;
+        }
+
+        public void SetActiveReloadAmbToggle(bool state)
+        {
+            reloadAmbToggle.interactable = state;
+        }
+
+        public void ChangeReloadRailToggle(bool state)
+        {
+            reloadRailToggle.isOn = state;
+            railFlag = state;
+        }
+
+        public void ChangeReloadAmbToggle(bool state)
+        {
+            reloadAmbToggle.isOn = state;
+            ambFlag = state;
         }
 
         public void SetRSDrawModel()

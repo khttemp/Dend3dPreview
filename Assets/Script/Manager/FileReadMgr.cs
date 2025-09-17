@@ -50,8 +50,10 @@ namespace FileReadMgrClass
                 mMain.defaultPath = Path.GetDirectoryName(filePath);
                 mMain.defaultOfdIndex = ofd.FilterIndex;
                 mMain.ChangeReadFileText(Path.GetFileName(mMain.openFilename));
-                mMain.railFlag = railFlag;
-                mMain.ambFlag = ambFlag;
+                mMain.SetActiveReloadRailToggle(true);
+                mMain.SetActiveReloadAmbToggle(true);
+                mMain.ChangeReloadRailToggle(railFlag);
+                mMain.ChangeReloadAmbToggle(ambFlag);
                 ReadFile(mMain, filePath);
             }
         }
