@@ -63,6 +63,7 @@ namespace MainClass
         
         StreamWriter sw;
         string datetimePattern = "yyyy-MM-dd HH:mm:ss";
+        public string denFileExt = ".den";
 
         public void Start()
         {
@@ -277,6 +278,17 @@ namespace MainClass
                 {
                     MessageBox.Show("AMB一部 配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+                else
+                {
+                    SetPanelText("路線別画像\n読み込み中...");
+                    yield return null;
+                    mAMBMgr.SetTexData(this);
+                    if (mAMBMgr.isError)
+                    {
+                        MessageBox.Show("路線別画像一部 配置失敗！\nエラーを確認してください", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+
 
                 if (reDrawFlag && editAmbNo != -1 && editAmbIndex != -1)
                 {

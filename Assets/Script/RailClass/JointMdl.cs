@@ -59,6 +59,10 @@ namespace JointMdlClass
                     }
                 }
             }
+            if (this.BaseJoint == null)
+            {
+                this.BaseJoint = AllTransformChildren[1];
+            }
 
             // BuffList
             int findCount = 0;

@@ -1237,6 +1237,7 @@ MonoBehaviour:
   modelDisplayMode: 0
   isAllDebug: 0
   isDebug: 0
+  denFileExt: .den
 --- !u!1 &343202625
 GameObject:
   m_ObjectHideFlags: 0

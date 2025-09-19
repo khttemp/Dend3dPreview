@@ -842,10 +842,11 @@ namespace RailMgrClass
             for (int i = 0; i < railObjList.Count; i++)
             {
                 GameObject railObj = railObjList[i];
+                JointMdl railJointMdl = railObj.GetComponent<JointMdl>();
                 RailMdl railMdl = railObj.GetComponent<RailMdl>();
                 if (modelDisplayMode == 0)
                 {
-                    railObj.SetActive(true);
+                    railJointMdl.BaseJoint.gameObject.SetActive(true);
                 }
                 else
                 {
@@ -853,22 +854,22 @@ namespace RailMgrClass
                     {
                         if (railMdl.block == currentBlock)
                         {
-                            railObj.SetActive(true);
+                            railJointMdl.BaseJoint.gameObject.SetActive(true);
                         }
                         else
                         {
-                            railObj.SetActive(false);
+                            railJointMdl.BaseJoint.gameObject.SetActive(false);
                         }
                     }
                     else if (modelDisplayMode == 2)
                     {
                         if (railMdl.block >= currentBlock - 1 && railMdl.block <= currentBlock + 3)
                         {
-                            railObj.SetActive(true);
+                            railJointMdl.BaseJoint.gameObject.SetActive(true);
                         }
                         else
                         {
-                            railObj.SetActive(false);
+                            railJointMdl.BaseJoint.gameObject.SetActive(false);
                         }
                     }
                 }

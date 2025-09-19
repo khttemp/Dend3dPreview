@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using UnityEngine;
 using UnityEngine.Rendering;
+using System.IO;
 
 using MainClass;
 using MdlMgrClass;
@@ -10,6 +11,7 @@ using JointMdlClass;
 using AmbListClass;
 using AmbDataClass;
 using AmbMdlClass;
+using EkihyoClass;
 
 namespace AMBMgrClass
 {
@@ -23,6 +25,12 @@ namespace AMBMgrClass
         public Dictionary<string, int> origin_kasen_model_dict;
         public Dictionary<string, int> kasen_model_dict;
         public List<string> kasenModelList;
+        public Dictionary<string, List<string[]>> origin_ekihyo_dict;
+        public Dictionary<string, List<string[]>> ekihyo_dict;
+        public List<string> EkihyoKeyList;
+        public List<string[]> EkihyoSeriesList;
+        public Dictionary<string, AssetBundle> stage_res_ab_dict;
+        public List<Texture2D> TexList;
         public bool isError = false;
         public int drawAmbCount = 0;
         public int search_amb_no = -1;
@@ -96,6 +104,193 @@ namespace AMBMgrClass
             {
                 kasen_model_dict.Add(kasenModelList[i], kasenValueList[i]);
             }
+
+            origin_ekihyo_dict = new Dictionary<string, List<string[]>>(){
+                {
+                    "AMB_DenWall", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo_Only", "0"}
+                    }
+                },
+                {
+                    "AMB_Ekihyo", new List<string[]>(){
+                        new string[]{"BASE", "0"}
+                    }
+                },
+                {
+                    "AMB_Ekihyo_Reg", new List<string[]>(){
+                        new string[]{"BASE", "1"}
+                    }
+                },
+                {
+                    "AMB_Ekihyo_Tate", new List<string[]>(){
+                        new string[]{null}
+                    }
+                },
+                {
+                    "AMB_HQ_YANE0", new List<string[]>(){
+                        new string[]{"HQ_Ekihyo", "2"},
+                        new string[]{"HQ_Ekihyo", "3"}
+                    }
+                },
+                {
+                    "AMB_HQ_YANE1", new List<string[]>(){
+                        new string[]{"HQ_Ekihyo", "2"},
+                        new string[]{"HQ_Ekihyo", "3"}
+                    }
+                },
+                {
+                    "AMB_HQ_YANE2", new List<string[]>(){
+                        new string[]{"HQ_Ekihyo", "2"},
+                        new string[]{"HQ_Ekihyo", "3"}
+                    }
+                },
+                {
+                    "AMB_HQ_YANE3", new List<string[]>(){
+                        new string[]{"HQ_Ekihyo", "2"},
+                        new string[]{"HQ_Ekihyo", "3"}
+                    }
+                },
+                {
+                    "AMB_MINA_ST_WALL", new List<string[]>(){
+                        new string[]{"MM_Ekihyo_Only", "4"}
+                    }
+                },
+                {
+                    "AMB_Mina_Wall", new List<string[]>(){
+                        new string[]{"MM_Ekihyo_Only", "4"}
+                    }
+                },
+                {
+                    "AMB_MM_Ekihyo", new List<string[]>(){
+                        new string[]{"MM_Ekihyo_Only", "4"}
+                    }
+                },
+                {
+                    "AMB_ShibuyaWall", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo_Only", "0"}
+                    }
+                },
+                {
+                    "AMB_ST_WALL", new List<string[]>(){
+                        new string[]{"MM_Ekihyo_Only", "4"}
+                    }
+                },
+                {
+                    "AMB_TQLight", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo2 1", "6"},
+                        new string[]{"TQ_Ekihyo2 (1) 2", "7"},
+                        new string[]{"TQ_Ekihyo2 2", "6"},
+                        new string[]{"TQ_Ekihyo2 (1) 1", "7"},
+                        new string[]{"TQ_Ekihyo2", "6"},
+                        new string[]{"TQ_Ekihyo2 (1)", "7"}
+                    }
+                },
+                {
+                    "Aobadai", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo1 1", "0"},
+                        new string[]{"TQ_Ekihyo1", "0"}
+                    }
+                },
+                {
+                    "basha_wall", new List<string[]>(){
+                        new string[]{"MM_Ekihyo_Only", "4"}
+                    }
+                },
+                {
+                    "HQ_Ekihyo", new List<string[]>(){
+                        new string[]{"Base", "2"},
+                        new string[]{"Base", "3"}
+                    }
+                },
+                {
+                    "ST_IronHashira", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo1", "0"},
+                        new string[]{"TQ_Ekihyo1 (1)", "0"}
+                    }
+                },
+                {
+                    "ST_IronHashira2", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo1", "0"},
+                        new string[]{"TQ_Ekihyo1 (1)", "0"}
+                    }
+                },
+                {
+                    "takatu_st", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"}
+                    }
+                },
+                {
+                    "takatu_st_none", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"}
+                    }
+                },
+                {
+                    "tq_hutako", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"},
+                        new string[]{"Ekihyo (1)", "5"}
+                    }
+                },
+                {
+                    "tq_hutako2", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"},
+                        new string[]{"Ekihyo (1)", "5"}
+                    }
+                },
+                {
+                    "TQ_Obj1", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo1", "0"},
+                        new string[]{"TQ_Ekihyo1 (1)", "0"}
+                    }
+                },
+                {
+                    "tq_st_wall2", new List<string[]>(){
+                        new string[]{"TQ_Ekihyo1", "0"}
+                    }
+                },
+                {
+                    "TQ_Yane_Big", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"}
+                    }
+                },
+                {
+                    "TQ_Yane00", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"}
+                    }
+                },
+                {
+                    "Yane_W", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"},
+                        new string[]{"Ekihyo (1)", "5"}
+                    }
+                },
+                {
+                    "Yane_W2", new List<string[]>(){
+                        new string[]{"Ekihyo", "5"},
+                        new string[]{"Ekihyo (1)", "5"}
+                    }
+                }
+            };
+            EkihyoKeyList = new List<string>(origin_ekihyo_dict.Keys);
+            for (int i = 0; i < EkihyoKeyList.Count; i++)
+            {
+                EkihyoKeyList[i] = EkihyoKeyList[i].ToUpper();
+            }
+            List<List<string[]>> EkihyoValueList = new List<List<string[]>>(origin_ekihyo_dict.Values);
+            ekihyo_dict = new Dictionary<string, List<string[]>>();
+            for (int i = 0; i < EkihyoValueList.Count; i++)
+            {
+                ekihyo_dict.Add(EkihyoKeyList[i], EkihyoValueList[i]);
+            }
+            EkihyoSeriesList = new List<string[]>(){
+                new string[]{"TQ_Ekihyo", "to_shibuya", "to_chuorinkan"},
+                new string[]{null, "to_shibuya", "to_chuorinkan"},
+                new string[]{"obj64"},
+                new string[]{"obj65"},
+                new string[]{null, "obj114", "obj115"},
+                new string[]{null, "TQ_Den_Ekihyo0", "TQ_Den_Ekihyo1"},
+                new string[]{"TQ_Ekihyo2"},
+                new string[]{"TQ_Ekihyo2 (1)"}
+            };
         }
 
         public void CreateAMB(int amb_index, int child_index, int rail_no, string mdl_name, amb_data ambData, Main mMain)
@@ -265,6 +460,8 @@ namespace AMBMgrClass
                 }
             }
             ambObjList = null;
+            stage_res_ab_dict = null;
+            TexList = null;
             search_amb_no = -1;
             search_amb_index = -1;
             System.GC.Collect();
@@ -309,7 +506,7 @@ namespace AMBMgrClass
                 {
                     GameObject railObj = mMain.mRailMgr.railObjList[ambMdl.ParentRailNo];
                     JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
-                    ambObjJointMdl.transform.parent = railObjJointMdl.transform;
+                    ambObjJointMdl.transform.parent = railObjJointMdl.BaseJoint.transform;
                     ambMdl.ParentAmbIndex = -1;
                     ambObj.SetActive(true);
                 }
@@ -513,6 +710,245 @@ namespace AMBMgrClass
                 MessageBox.Show("予想外のエラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.LogError(e.ToString());
                 mMain.DebugError(e.ToString());
+            }
+        }
+
+        public void SetTexData(Main mMain)
+        {
+            try
+            {
+                isError = false;
+                if (mMain.mStageTblMgr.StageResDataList != null)
+                {
+                    stage_res_ab_dict = new Dictionary<string, AssetBundle>();
+                    TexList = new List<Texture2D>();
+                    List<TextAsset> tempTextAsset = new List<TextAsset>();
+                    for (int i = 0; i < mMain.mStageTblMgr.StageResDataList.Length; i++)
+                    {
+                        string denFile = mMain.mStageTblMgr.StageResDataList[i].ab + mMain.denFileExt;
+                        AssetBundle readAssetBundle;
+                        if (!stage_res_ab_dict.ContainsKey(denFile))
+                        {
+                            readAssetBundle = GetAssetBundle(mMain, denFile);
+                            stage_res_ab_dict.Add(denFile, readAssetBundle);
+                        }
+                        else
+                        {
+                            readAssetBundle = stage_res_ab_dict[denFile];
+                        }
+                        if (readAssetBundle == null)
+                        {
+                            mMain.DebugError("StageRes No." + i + "のdenファイル(" + denFile + ")を探せません");
+                            isError = true;
+                            break;
+                        }
+                        string filename = mMain.mStageTblMgr.StageResDataList[i].res_name;
+                        TextAsset textAsset = readAssetBundle.LoadAsset(filename) as TextAsset;
+                        if (textAsset == null)
+                        {
+                            mMain.DebugError("StageRes No." + i + "のdenファイル(" + denFile + ")のテクスチャ(" + filename + ")探せません");
+                            isError = true;
+                            break;
+                        }
+                        Texture2D texture2D = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                        texture2D.LoadImage(textAsset.bytes);
+                        texture2D.filterMode = FilterMode.Bilinear;
+                        texture2D.wrapMode = TextureWrapMode.Repeat;
+                        texture2D.name = filename;
+                        TexList.Add(texture2D);
+                    }
+                }
+            }
+            catch (System.Exception e)
+            {
+                MessageBox.Show("予想外のエラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debug.LogError(e.ToString());
+                mMain.DebugError(e.ToString());
+            }
+
+            try
+            {
+                if (mMain.mStageTblMgr.TexInfoDataList != null)
+                {
+                    List<GameObject> searchAmbMdlList;
+                    GameObject ambObj;
+                    for (int i = 0; i < mMain.mStageTblMgr.TexInfoDataList.Length; i++)
+                    {
+                        searchAmbMdlList = null;
+                        ambObj = null;
+                        int ambNo = mMain.mStageTblMgr.TexInfoDataList[i].amb;
+                        if (ambNo >= 0)
+                        {
+                            int amb_child = mMain.mStageTblMgr.TexInfoDataList[i].amb_child;
+                            if (ambNo >= ambObjList.Length)
+                            {
+                                mMain.DebugWarning("SetTexInfo No." + i + "のAMB No." + ambNo + "は存在しません");
+                                continue;
+                            }
+                            searchAmbMdlList = ambObjList[ambNo];
+                            if (searchAmbMdlList == null)
+                            {
+                                mMain.DebugWarning("SetTexInfo No." + i + "のAMB No." + ambNo + "のモデルは存在しません");
+                                continue;
+                            }
+                            if (amb_child >= searchAmbMdlList.Count)
+                            {
+                                mMain.DebugWarning("SetTexInfo No." + i + "のAMB No." + ambNo + "で、child番号(" + amb_child + ")は存在しません");
+                                continue;
+                            }
+                            ambObj = searchAmbMdlList[amb_child];
+                            if (ambObj != null)
+                            {
+                                JointMdl ambJointModel = ambObj.GetComponent<JointMdl>();
+                                int tex_type = mMain.mStageTblMgr.TexInfoDataList[i].tex_type;
+                                if (tex_type == 0 || tex_type == 1 || tex_type == 2)
+                                {
+                                    if (ambObj.GetComponent<Ekihyo>() == null)
+                                    {
+                                        ambObj.AddComponent<Ekihyo>();
+                                    }
+                                    Ekihyo ekihyo = ambObj.GetComponent<Ekihyo>();
+                                    if (!ekihyo_dict.ContainsKey(ambJointModel.Name.ToUpper()))
+                                    {
+                                        mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")は、駅表を設定できません");
+                                        continue;
+                                    }
+                                    int change_index = mMain.mStageTblMgr.TexInfoDataList[i].change_index;
+                                    List<string[]> ekihyo_value = ekihyo_dict[ambJointModel.Name.ToUpper()];
+                                    if (change_index >= ekihyo_value.Count)
+                                    {
+                                        mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")の、対象の駅表モデルindex範囲を超えています(" + change_index + ")");
+                                        continue;
+                                    }
+                                    string[] change_info = ekihyo_value[change_index];
+                                    if (change_info[0] == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    List<Transform> childList = SearchChild<Transform>(ambObj.transform);
+                                    Transform parentTrans = childList.Find(x => x.name.Equals(change_info[0]));
+                                    if (parentTrans == null)
+                                    {
+                                        mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")で、" + change_info[0] + "の要素を探せません");
+                                        continue;
+                                    }
+
+                                    string[] searchNameList = EkihyoSeriesList[int.Parse(change_info[1])];
+                                    Transform bodyObjTrans = null;
+                                    Transform[] objListTrans = null;
+                                    if (ambJointModel.Name.Equals("AMB_TQLight"))
+                                    {
+                                        bodyObjTrans = parentTrans;
+                                        parentTrans = parentTrans.transform.parent;
+                                    }
+                                    else
+                                    {
+                                        if (searchNameList.Length > 1)
+                                        {
+                                            objListTrans = new Transform[2];
+                                        }
+                                        for (int j = 0; j < parentTrans.childCount; j++)
+                                        {
+                                            Transform childTrans = parentTrans.GetChild(j);
+                                            if (searchNameList[0] != null && childTrans.name.Contains(searchNameList[0]))
+                                            {
+                                                bodyObjTrans = childTrans;
+                                            }
+                                            if (searchNameList.Length > 1)
+                                            {
+                                                if (childTrans.name.Contains(searchNameList[1]))
+                                                {
+                                                    objListTrans[0] = childTrans;
+                                                }
+                                                if (childTrans.name.Contains(searchNameList[2]))
+                                                {
+                                                    objListTrans[1] = childTrans;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Texture2D tex = TexList[mMain.mStageTblMgr.TexInfoDataList[i].res_data_index];
+                                    if (bodyObjTrans != null)
+                                    {
+                                        Renderer BodyObj = bodyObjTrans.GetComponent<Renderer>();
+                                        Material[] materials = BodyObj.materials;
+                                        tex.wrapMode = materials[0].mainTexture.wrapMode;
+                                        materials[0].SetTexture("_MainTex", tex);
+                                        materials[0].SetTexture("_EmissionMap", tex);
+                                        BodyObj.materials = materials;
+                                        if (tex_type == 2)
+                                        {
+                                            if (!ekihyo.is_rot)
+                                            {
+                                                ekihyo.is_rot = true;
+                                                Vector3 local_rot = parentTrans.localRotation.eulerAngles;
+                                                local_rot.y = local_rot.y + 180f;
+                                                parentTrans.localRotation = Quaternion.Euler(local_rot);
+                                            }
+                                        }
+                                    }
+                                    if (objListTrans != null)
+                                    {
+                                        for (int j = 0; j < objListTrans.Length; j++)
+                                        {
+                                            Renderer renderObj = objListTrans[j].GetComponent<Renderer>();
+                                            if (j == tex_type)
+                                            {
+                                                renderObj.gameObject.SetActive(true);
+                                                int mat_index = mMain.mStageTblMgr.TexInfoDataList[i].mat_index;
+                                                Material[] materials = renderObj.materials;
+                                                if (mat_index >= materials.Length)
+                                                {
+                                                    mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")の、対象のmaterial index範囲を超えています(" + mat_index + ")");
+                                                    continue;
+                                                }
+                                                tex.wrapMode = materials[mat_index].mainTexture.wrapMode;
+                                                materials[mat_index].SetTexture("_MainTex", tex);
+                                                materials[mat_index].SetTexture("_EmissionMap", tex);
+                                                renderObj.materials = materials;
+                                            }
+                                            else
+                                            {
+                                                renderObj.gameObject.SetActive(false);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                ClearAssetBundle();
+            }
+            catch (System.Exception e)
+            {
+                MessageBox.Show("予想外のエラー！", "失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debug.LogError(e.ToString());
+                mMain.DebugError(e.ToString());
+            }
+        }
+
+        public AssetBundle GetAssetBundle(Main mMain, string denFile)
+        {
+            string path = Path.Combine(mMain.defaultPath, denFile);
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+            return AssetBundle.LoadFromFile(path);
+        }
+
+        public void ClearAssetBundle()
+        {
+            if (stage_res_ab_dict != null)
+            {
+                List<string> abKeyList = new List<string>(stage_res_ab_dict.Keys);
+                for (int i = 0; i < abKeyList.Count; i++)
+                {
+                    stage_res_ab_dict[abKeyList[i]].Unload(true);
+                }
             }
         }
     }

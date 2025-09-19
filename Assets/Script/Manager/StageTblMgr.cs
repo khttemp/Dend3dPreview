@@ -6,6 +6,8 @@ using MainClass;
 using StListClass;
 using EventListClass;
 using MdlListClass;
+using StageResDataClass;
+using TexInfoDataClass;
 using RailListClass;
 using RailDataListClass;
 using RailDataClass;
@@ -19,6 +21,8 @@ namespace StageTblMgrClass
         public st_list[] StList;
         public event_list[] EventList;
         public mdl_list[] MdlList;
+        public stage_res_data[] StageResDataList;
+        public tex_info_data[] TexInfoDataList;
         public rail_list[] RailList;
         public amb_list[] AmbList;
         public int railStartIndex;
@@ -29,6 +33,8 @@ namespace StageTblMgrClass
             this.StList = null;
             this.EventList = null;
             this.MdlList = null;
+            this.StageResDataList = null;
+            this.TexInfoDataList = null;
             this.RailList = null;
             this.AmbList = null;
         }
@@ -41,6 +47,8 @@ namespace StageTblMgrClass
             int num10 = -1;
             int num12 = -1;
             int num15 = -1;
+            int num8 = -1;
+            int num9 = -1;
             int num16 = -1;
             int num20 = -1;
             for (int i = 0; i < array.Length; i++)
@@ -56,6 +64,14 @@ namespace StageTblMgrClass
                 else if (array[i].Contains("MdlCnt:"))
                 {
                     num15 = i;
+                }
+                else if (array[i].Contains("StageRes:"))
+                {
+                    num8 = i;
+                }
+                else if (array[i].Contains("SetTexInfo:"))
+                {
+                    num9 = i;
                 }
                 else if (array[i].Contains("RailCnt:"))
                 {
@@ -156,11 +172,6 @@ namespace StageTblMgrClass
                     int num59 = 1;
                     this.MdlList[num58] = new mdl_list();
                     array38 = ReadTbl(array[num15 + 1 + num58]);
-                    if (array38.Length == 0)
-                    {
-                        mMain.DebugError("空のデータ！レール設定番号(" + num27 + ")　実データ(" + num58 + ")");
-                        return false;
-                    }
                     this.MdlList[num58].mdl_name = array38[num59++];
                     int num60 = int.Parse(array38[num59++]);
                     int num61 = int.Parse(array38[num59++]);
@@ -174,6 +185,81 @@ namespace StageTblMgrClass
                 if (array38 != null)
                 {
                     mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array38) + "]");
+                }
+                mMain.DebugError(ex2.ToString());
+                return false;
+            }
+
+            // StageRes
+            string[] array32 = null;
+            try
+            {
+                if (num8 > 0)
+                {
+                    string[] array12 = ReadTbl(array[num8]);
+                    int StageResCnt = int.Parse(array12[1]);
+                    if (StageResCnt > 0)
+                    {
+                        this.StageResDataList = new stage_res_data[StageResCnt];
+                        for (int num41 = 0; num41 < StageResCnt; num41++)
+                        {
+                            int num42 = 1;
+                            array32 = ReadTbl(array[num8 + 1 + num41]);
+                            this.StageResDataList[num41] = new stage_res_data();
+                            this.StageResDataList[num41].ab = array32[num42++];
+                            this.StageResDataList[num41].res_name = array32[num42++];
+                        }
+                    }
+                }
+            }
+            catch (System.Exception ex2)
+            {
+                mMain.DebugError("StageRes読込エラー");
+                if (array32 != null)
+                {
+                    mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array32) + "]");
+                }
+                mMain.DebugError(ex2.ToString());
+                return false;
+            }
+
+            // TexInfoData
+            string[] array33 = null;
+            try
+            {
+                if (num9 > 0)
+                {
+                    string[] array13 = ReadTbl(array[num9]);
+                    int TexInfoDataCnt = int.Parse(array13[1]);
+                    if (TexInfoDataCnt > 0)
+                    {
+                        this.TexInfoDataList = new tex_info_data[TexInfoDataCnt];
+                        for (int num44 = 0; num44 < TexInfoDataCnt; num44++)
+                        {
+                            int num45 = 1;
+                            array33 = ReadTbl(array[num9 + 1 + num44]);
+                            this.TexInfoDataList[num44] = new tex_info_data();
+                            this.TexInfoDataList[num44].amb = int.Parse(array33[num45++]);
+                            this.TexInfoDataList[num44].amb_child = int.Parse(array33[num45++]);
+                            this.TexInfoDataList[num44].res_data_index = int.Parse(array33[num45++]);
+                            this.TexInfoDataList[num44].tex_type = int.Parse(array33[num45++]);
+                            this.TexInfoDataList[num44].change_index = int.Parse(array33[num45++]);
+                            this.TexInfoDataList[num44].mat_index = int.Parse(array33[num45++]);
+                            if (this.TexInfoDataList[num44].tex_type == 31 && array33.Length > num45)
+                            {
+                                this.TexInfoDataList[num44].f1 = float.Parse(array33[num45++]);
+                                this.TexInfoDataList[num44].f2 = float.Parse(array33[num45++]);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (System.Exception ex2)
+            {
+                mMain.DebugError("TexInfoData読込エラー");
+                if (array33 != null)
+                {
+                    mMain.DebugError("エラーが起きたデータ：[" + string.Join(", ", array33) + "]");
                 }
                 mMain.DebugError(ex2.ToString());
                 return false;

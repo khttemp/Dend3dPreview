@@ -20,6 +20,8 @@ namespace FileReadMgrClass
             {"駅名", "STCnt:"},
             {"コミックスクリプト", "ComicScript:"},
             {"モデル情報", "MdlCnt:"},
+            {"路線別画像データ", "StageRes:"},
+            {"画像設定情報", "SetTexInfo:"},
             {"レール情報", "RailCnt:"},
             {"AMB情報", "AmbCnt:"}
         };
@@ -176,6 +178,8 @@ namespace FileReadMgrClass
                         fileContent += GetSheetInfo(mMain, dataSetResult, "駅名", "STCnt:", false);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "コミックスクリプト", "ComicScript:", false);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "モデル情報", "MdlCnt:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "路線別画像データ", "StageRes:", true);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "画像設定情報", "SetTexInfo:", true);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "レール情報", "RailCnt:", true);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "AMB情報", "AmbCnt:", true);
                     }
@@ -184,6 +188,8 @@ namespace FileReadMgrClass
                         fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "STCnt:", false);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "ComicScript:", false);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "MdlCnt:", false);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "StageRes:", true);
+                        fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "SetTexInfo:", true);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "RailCnt:", true);
                         fileContent += GetSheetInfo(mMain, dataSetResult, "0番目", "AmbCnt:", true);
                     }
