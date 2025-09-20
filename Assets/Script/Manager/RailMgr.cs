@@ -394,6 +394,7 @@ namespace RailMgrClass
             if ((r.flg & (1U << 31)) > 0 )
             {
                 railObj.SetActive(false);
+                railMdl.isDisabled = true;
                 return;
             }
             if (r.prev_rail < 0)
@@ -844,9 +845,14 @@ namespace RailMgrClass
                 GameObject railObj = railObjList[i];
                 JointMdl railJointMdl = railObj.GetComponent<JointMdl>();
                 RailMdl railMdl = railObj.GetComponent<RailMdl>();
+                if (railMdl.isDisabled)
+                {
+                    continue;
+                }
+
                 if (modelDisplayMode == 0)
                 {
-                    railJointMdl.BaseJoint.gameObject.SetActive(true);
+                    railObj.SetActive(true);
                 }
                 else
                 {
@@ -854,22 +860,22 @@ namespace RailMgrClass
                     {
                         if (railMdl.block == currentBlock)
                         {
-                            railJointMdl.BaseJoint.gameObject.SetActive(true);
+                            railObj.SetActive(true);
                         }
                         else
                         {
-                            railJointMdl.BaseJoint.gameObject.SetActive(false);
+                            railObj.SetActive(false);
                         }
                     }
                     else if (modelDisplayMode == 2)
                     {
                         if (railMdl.block >= currentBlock - 1 && railMdl.block <= currentBlock + 3)
                         {
-                            railJointMdl.BaseJoint.gameObject.SetActive(true);
+                            railObj.SetActive(true);
                         }
                         else
                         {
-                            railJointMdl.BaseJoint.gameObject.SetActive(false);
+                            railObj.SetActive(false);
                         }
                     }
                 }

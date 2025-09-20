@@ -13,6 +13,7 @@ namespace RailMdlClass
         public int railNum;
         public bool railCheck;
         public int railCnt;
+        public bool isDisabled = false;
         public Transform[,] railTransformList;
         public Transform[] railKasenStartPosList;
         public Transform[] railKasenEndPosList;

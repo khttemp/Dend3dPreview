@@ -8,6 +8,7 @@ using System.IO;
 using MainClass;
 using MdlMgrClass;
 using JointMdlClass;
+using RailMdlClass;
 using AmbListClass;
 using AmbDataClass;
 using AmbMdlClass;
@@ -506,7 +507,7 @@ namespace AMBMgrClass
                 {
                     GameObject railObj = mMain.mRailMgr.railObjList[ambMdl.ParentRailNo];
                     JointMdl railObjJointMdl = railObj.GetComponent<JointMdl>();
-                    ambObjJointMdl.transform.parent = railObjJointMdl.BaseJoint.transform;
+                    ambObjJointMdl.transform.parent = railObjJointMdl.transform;
                     ambMdl.ParentAmbIndex = -1;
                     ambObj.SetActive(true);
                 }
@@ -688,7 +689,9 @@ namespace AMBMgrClass
                         mMain.DebugWarning("AMB No." + i + "は、存在しないレール番号(" + rail_no +")を指しています");
                         continue;
                     }
-                    if (!mMain.mRailMgr.railObjList[rail_no].activeSelf)
+                    GameObject parentRailObj = mMain.mRailMgr.railObjList[rail_no];
+                    RailMdl parentRailMdl = parentRailObj.GetComponent<RailMdl>();
+                    if (parentRailMdl.isDisabled)
                     {
                         mMain.DebugWarning("AMB No." + i + "は、Disabledレール番号(" + rail_no +")を指しています");
                         continue;
@@ -770,149 +773,139 @@ namespace AMBMgrClass
             {
                 if (mMain.mStageTblMgr.TexInfoDataList != null)
                 {
-                    List<GameObject> searchAmbMdlList;
                     GameObject ambObj;
                     for (int i = 0; i < mMain.mStageTblMgr.TexInfoDataList.Length; i++)
                     {
-                        searchAmbMdlList = null;
                         ambObj = null;
                         int ambNo = mMain.mStageTblMgr.TexInfoDataList[i].amb;
                         if (ambNo >= 0)
                         {
-                            int amb_child = mMain.mStageTblMgr.TexInfoDataList[i].amb_child;
                             if (ambNo >= ambObjList.Length)
                             {
                                 mMain.DebugWarning("SetTexInfo No." + i + "のAMB No." + ambNo + "は存在しません");
                                 continue;
                             }
-                            searchAmbMdlList = ambObjList[ambNo];
-                            if (searchAmbMdlList == null)
+                            int amb_child = mMain.mStageTblMgr.TexInfoDataList[i].amb_child;
+                            ambObj = Search(ambNo, amb_child - 1);
+                            if (ambObj == null)
                             {
-                                mMain.DebugWarning("SetTexInfo No." + i + "のAMB No." + ambNo + "のモデルは存在しません");
+                                mMain.DebugWarning("SetTexInfo No." + i + "のAMB No." + ambNo + "で、child番号(" + amb_child + ")のモデルは存在しません");
                                 continue;
                             }
-                            if (amb_child >= searchAmbMdlList.Count)
+
+                            JointMdl ambJointModel = ambObj.GetComponent<JointMdl>();
+                            int tex_type = mMain.mStageTblMgr.TexInfoDataList[i].tex_type;
+                            if (tex_type == 0 || tex_type == 1 || tex_type == 2)
                             {
-                                mMain.DebugWarning("SetTexInfo No." + i + "のAMB No." + ambNo + "で、child番号(" + amb_child + ")は存在しません");
-                                continue;
-                            }
-                            ambObj = searchAmbMdlList[amb_child];
-                            if (ambObj != null)
-                            {
-                                JointMdl ambJointModel = ambObj.GetComponent<JointMdl>();
-                                int tex_type = mMain.mStageTblMgr.TexInfoDataList[i].tex_type;
-                                if (tex_type == 0 || tex_type == 1 || tex_type == 2)
+                                if (ambObj.GetComponent<Ekihyo>() == null)
                                 {
-                                    if (ambObj.GetComponent<Ekihyo>() == null)
-                                    {
-                                        ambObj.AddComponent<Ekihyo>();
-                                    }
-                                    Ekihyo ekihyo = ambObj.GetComponent<Ekihyo>();
-                                    if (!ekihyo_dict.ContainsKey(ambJointModel.Name.ToUpper()))
-                                    {
-                                        mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")は、駅表を設定できません");
-                                        continue;
-                                    }
-                                    int change_index = mMain.mStageTblMgr.TexInfoDataList[i].change_index;
-                                    List<string[]> ekihyo_value = ekihyo_dict[ambJointModel.Name.ToUpper()];
-                                    if (change_index >= ekihyo_value.Count)
-                                    {
-                                        mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")の、対象の駅表モデルindex範囲を超えています(" + change_index + ")");
-                                        continue;
-                                    }
-                                    string[] change_info = ekihyo_value[change_index];
-                                    if (change_info[0] == null)
-                                    {
-                                        continue;
-                                    }
+                                    ambObj.AddComponent<Ekihyo>();
+                                }
+                                Ekihyo ekihyo = ambObj.GetComponent<Ekihyo>();
+                                if (!ekihyo_dict.ContainsKey(ambJointModel.Name.ToUpper()))
+                                {
+                                    mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")は、駅表を設定できません");
+                                    continue;
+                                }
+                                int change_index = mMain.mStageTblMgr.TexInfoDataList[i].change_index;
+                                List<string[]> ekihyo_value = ekihyo_dict[ambJointModel.Name.ToUpper()];
+                                if (change_index >= ekihyo_value.Count)
+                                {
+                                    mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")の、対象の駅表モデルindex範囲を超えています(" + change_index + ")");
+                                    continue;
+                                }
+                                string[] change_info = ekihyo_value[change_index];
+                                if (change_info[0] == null)
+                                {
+                                    continue;
+                                }
 
-                                    List<Transform> childList = SearchChild<Transform>(ambObj.transform);
-                                    Transform parentTrans = childList.Find(x => x.name.Equals(change_info[0]));
-                                    if (parentTrans == null)
-                                    {
-                                        mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")で、" + change_info[0] + "の要素を探せません");
-                                        continue;
-                                    }
+                                List<Transform> childList = SearchChild<Transform>(ambObj.transform);
+                                Transform parentTrans = childList.Find(x => x.name.Equals(change_info[0]));
+                                if (parentTrans == null)
+                                {
+                                    mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")で、" + change_info[0] + "の要素を探せません");
+                                    continue;
+                                }
 
-                                    string[] searchNameList = EkihyoSeriesList[int.Parse(change_info[1])];
-                                    Transform bodyObjTrans = null;
-                                    Transform[] objListTrans = null;
-                                    if (ambJointModel.Name.Equals("AMB_TQLight"))
+                                string[] searchNameList = EkihyoSeriesList[int.Parse(change_info[1])];
+                                Transform bodyObjTrans = null;
+                                Transform[] objListTrans = null;
+                                if (ambJointModel.Name.Equals("AMB_TQLight"))
+                                {
+                                    bodyObjTrans = parentTrans;
+                                    parentTrans = parentTrans.transform.parent;
+                                }
+                                else
+                                {
+                                    if (searchNameList.Length > 1)
                                     {
-                                        bodyObjTrans = parentTrans;
-                                        parentTrans = parentTrans.transform.parent;
+                                        objListTrans = new Transform[2];
                                     }
-                                    else
+                                    for (int j = 0; j < parentTrans.childCount; j++)
                                     {
+                                        Transform childTrans = parentTrans.GetChild(j);
+                                        if (searchNameList[0] != null && childTrans.name.Contains(searchNameList[0]))
+                                        {
+                                            bodyObjTrans = childTrans;
+                                        }
                                         if (searchNameList.Length > 1)
                                         {
-                                            objListTrans = new Transform[2];
-                                        }
-                                        for (int j = 0; j < parentTrans.childCount; j++)
-                                        {
-                                            Transform childTrans = parentTrans.GetChild(j);
-                                            if (searchNameList[0] != null && childTrans.name.Contains(searchNameList[0]))
+                                            if (childTrans.name.Contains(searchNameList[1]))
                                             {
-                                                bodyObjTrans = childTrans;
+                                                objListTrans[0] = childTrans;
                                             }
-                                            if (searchNameList.Length > 1)
+                                            if (childTrans.name.Contains(searchNameList[2]))
                                             {
-                                                if (childTrans.name.Contains(searchNameList[1]))
-                                                {
-                                                    objListTrans[0] = childTrans;
-                                                }
-                                                if (childTrans.name.Contains(searchNameList[2]))
-                                                {
-                                                    objListTrans[1] = childTrans;
-                                                }
+                                                objListTrans[1] = childTrans;
                                             }
                                         }
                                     }
+                                }
 
-                                    Texture2D tex = TexList[mMain.mStageTblMgr.TexInfoDataList[i].res_data_index];
-                                    if (bodyObjTrans != null)
+                                Texture2D tex = TexList[mMain.mStageTblMgr.TexInfoDataList[i].res_data_index];
+                                if (bodyObjTrans != null)
+                                {
+                                    Renderer BodyObj = bodyObjTrans.GetComponent<Renderer>();
+                                    Material[] materials = BodyObj.materials;
+                                    tex.wrapMode = materials[0].mainTexture.wrapMode;
+                                    materials[0].SetTexture("_MainTex", tex);
+                                    materials[0].SetTexture("_EmissionMap", tex);
+                                    BodyObj.materials = materials;
+                                    if (tex_type == 2)
                                     {
-                                        Renderer BodyObj = bodyObjTrans.GetComponent<Renderer>();
-                                        Material[] materials = BodyObj.materials;
-                                        tex.wrapMode = materials[0].mainTexture.wrapMode;
-                                        materials[0].SetTexture("_MainTex", tex);
-                                        materials[0].SetTexture("_EmissionMap", tex);
-                                        BodyObj.materials = materials;
-                                        if (tex_type == 2)
+                                        if (!ekihyo.is_rot)
                                         {
-                                            if (!ekihyo.is_rot)
-                                            {
-                                                ekihyo.is_rot = true;
-                                                Vector3 local_rot = parentTrans.localRotation.eulerAngles;
-                                                local_rot.y = local_rot.y + 180f;
-                                                parentTrans.localRotation = Quaternion.Euler(local_rot);
-                                            }
+                                            ekihyo.is_rot = true;
+                                            Vector3 local_rot = parentTrans.localRotation.eulerAngles;
+                                            local_rot.y = local_rot.y + 180f;
+                                            parentTrans.localRotation = Quaternion.Euler(local_rot);
                                         }
                                     }
-                                    if (objListTrans != null)
+                                }
+                                if (objListTrans != null)
+                                {
+                                    for (int j = 0; j < objListTrans.Length; j++)
                                     {
-                                        for (int j = 0; j < objListTrans.Length; j++)
+                                        Renderer renderObj = objListTrans[j].GetComponent<Renderer>();
+                                        if (j == tex_type)
                                         {
-                                            Renderer renderObj = objListTrans[j].GetComponent<Renderer>();
-                                            if (j == tex_type)
+                                            renderObj.gameObject.SetActive(true);
+                                            int mat_index = mMain.mStageTblMgr.TexInfoDataList[i].mat_index;
+                                            Material[] materials = renderObj.materials;
+                                            if (mat_index >= materials.Length)
                                             {
-                                                renderObj.gameObject.SetActive(true);
-                                                int mat_index = mMain.mStageTblMgr.TexInfoDataList[i].mat_index;
-                                                Material[] materials = renderObj.materials;
-                                                if (mat_index >= materials.Length)
-                                                {
-                                                    mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")の、対象のmaterial index範囲を超えています(" + mat_index + ")");
-                                                    continue;
-                                                }
-                                                tex.wrapMode = materials[mat_index].mainTexture.wrapMode;
-                                                materials[mat_index].SetTexture("_MainTex", tex);
-                                                materials[mat_index].SetTexture("_EmissionMap", tex);
-                                                renderObj.materials = materials;
+                                                mMain.DebugWarning("SetTexInfo No." + i + "で指定したAMB(" + ambJointModel.Name + ")の、対象のmaterial index範囲を超えています(" + mat_index + ")");
+                                                continue;
                                             }
-                                            else
-                                            {
-                                                renderObj.gameObject.SetActive(false);
-                                            }
+                                            tex.wrapMode = materials[mat_index].mainTexture.wrapMode;
+                                            materials[mat_index].SetTexture("_MainTex", tex);
+                                            materials[mat_index].SetTexture("_EmissionMap", tex);
+                                            renderObj.materials = materials;
+                                        }
+                                        else
+                                        {
+                                            renderObj.gameObject.SetActive(false);
                                         }
                                     }
                                 }
